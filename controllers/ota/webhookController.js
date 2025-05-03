@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const Customer = require('../../models/ota/Customer');
 
+// Signature verify karne wala middleware
 const verifyGithubSignature = (req, res, buf) => {
   const signature = req.headers['x-hub-signature-256'];
   const hmac = crypto.createHmac('sha256', process.env.GITHUB_WEBHOOK_SECRET);
@@ -15,11 +16,6 @@ const githubWebhookHandler = async (req, res) => {
   const event = req.headers['x-github-event'];
   const payload = req.body;
 
-  // Optional: Ping test
-  if (event === 'ping') {
-    return res.status(200).send('pong');
-  }
-
   try {
     if (event === 'installation' && payload.action === 'created') {
       const installationId = payload.installation.id;
@@ -27,9 +23,16 @@ const githubWebhookHandler = async (req, res) => {
       const accountType = payload.installation.account.type;
       const htmlUrl = payload.installation.account.html_url;
 
-      // Find frontend and backend repos
-      const frontendRepo = payload.repositories.find(repo => repo.name === 'frontend');
-      const backendRepo = payload.repositories.find(repo => repo.name === 'backend');
+      // Map repositories data (array mein convert karke useful fields nikaalna)
+      const repositories = payload.repositories.map(repo => ({
+        name: repo.name,
+        full_name: repo.full_name,
+        private: repo.private,
+        html_url: repo.html_url || ''
+      }));
+
+      const frontendRepo = repositories.find(repo => repo.name === 'frontend');
+      const backendRepo = repositories.find(repo => repo.name === 'backend');
 
       const customerExists = await Customer.findOne({ githubInstallationId: installationId });
 
@@ -41,12 +44,8 @@ const githubWebhookHandler = async (req, res) => {
           htmlUrl,
           frontendRepo: frontendRepo?.full_name || '',
           backendRepo: backendRepo?.full_name || '',
-          repositories: payload.repositories
+          repositories
         });
-
-        console.log("✅ New customer added:", accountLogin);
-      } else {
-        console.log("ℹ️ Customer already exists:", accountLogin);
       }
 
       return res.status(200).json({ success: true });
@@ -54,7 +53,7 @@ const githubWebhookHandler = async (req, res) => {
 
     res.status(200).json({ message: 'Event ignored' });
   } catch (error) {
-    console.error('❌ Webhook Error:', error.message);
+    console.error('Webhook Error:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
