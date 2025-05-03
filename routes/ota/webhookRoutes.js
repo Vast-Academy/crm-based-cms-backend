@@ -7,14 +7,15 @@ const {
 
 router.post(
   '/github-webhook',
-  express.raw({ type: 'application/json' }), // to access raw body for signature verification
+  express.raw({ type: 'application/json' }),
   (req, res, next) => {
     try {
       verifyGithubSignature(req, res, req.body);
-      req.body = JSON.parse(req.body.toString()); // convert raw body to JSON after verifying
+      req.body = JSON.parse(req.body.toString());
       next();
     } catch (err) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      console.error("❌ Signature verification failed:", err.message);
+      return res.status(401).json({ error: 'Unauthorized - Invalid Signature' });
     }
   },
   githubWebhookHandler

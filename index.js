@@ -22,12 +22,14 @@ const allowedOrigins = [
   app.options('*', (req, res) => {
     res.status(200).end();
   });
+
+app.use('/api/webhooks', webhookRoutes);
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
 app.use("/api", router);
-app.use('/api/webhooks', webhookRoutes);
 
 const PORT = process.env.PORT || 8080;
 
