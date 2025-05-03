@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const customerSchema = new mongoose.Schema({
+const otaCustomerSchema = new mongoose.Schema({
   name: String,
   email: String,
   githubInstallationId: {
@@ -25,4 +25,4 @@ const customerSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model("Customer", customerSchema);
+module.exports = mongoose.model("OtaCustomer", otaCustomerSchema);
