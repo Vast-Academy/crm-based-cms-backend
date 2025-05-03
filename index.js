@@ -4,10 +4,11 @@ const cookieParser = require('cookie-parser')
 require('dotenv').config()
 const connectDB = require('./config/db')
 const router = require('./routes')
+const webhookRoutes = require('./routes/ota/webhookRoutes')
 
 const app = express()
 const allowedOrigins = [
-    'https://cms.3gdigital.net', 
+    'https://crm-based-cms-frontend.vercel.app', 
     process.env.FORNTEND_URL, // आपके .env से
     'http://localhost:3000' // लोकल डेवलपमेंट के लिए
   ];
@@ -25,7 +26,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
-app.use("/api", router)
+app.use("/api", router);
+app.use('/api/webhooks', webhookRoutes);
 
 const PORT = process.env.PORT || 8080;
 
