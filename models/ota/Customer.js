@@ -8,6 +8,7 @@ const otaCustomerSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  githubUsername: String,
   repoOwner: String,
   frontendRepo: String,
   backendRepo: String,
