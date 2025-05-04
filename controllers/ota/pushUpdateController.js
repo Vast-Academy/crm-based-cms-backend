@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const { Octokit } = require("@octokit/rest");
 const { createAppAuth } = require("@octokit/auth-app");
 const simpleGit = require("simple-git");
 const OtaCustomer = require("../../models/ota/Customer");
