@@ -4,8 +4,6 @@ const cookieParser = require('cookie-parser')
 require('dotenv').config()
 const connectDB = require('./config/db')
 const router = require('./routes')
-const webhookRoutes = require('./routes/ota/webhookRoutes')
-const pushRoutes = require('./routes/ota/pushRoutes');
 
 const app = express()
 const allowedOrigins = [
@@ -23,9 +21,6 @@ const allowedOrigins = [
   app.options('*', (req, res) => {
     res.status(200).end();
   });
-
-app.use('/api/webhooks', webhookRoutes);
-app.use('/api/ota', pushRoutes);
 
 
 app.use(express.json())
