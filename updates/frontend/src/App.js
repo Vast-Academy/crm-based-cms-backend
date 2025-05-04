@@ -36,6 +36,7 @@ import ManagerDetail from './pages/users/ManagerDetail';
 import BranchDetails from './pages/branches/BranchDetails';
 import InventoryPage from './pages/inventory/InventoryPage';
 import ResetDefaultPage from './pages/ResetDefaultPage';
+import NewPage from './pages/newPage';
 
 // Protected route component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -138,6 +139,15 @@ function App() {
               element={
                 <ProtectedRoute >
                   <ResetDefaultPage />
+                </ProtectedRoute>
+              } 
+            />
+
+<Route 
+              path="new-page" 
+              element={
+                <ProtectedRoute >
+                  <NewPage />
                 </ProtectedRoute>
               } 
             />
