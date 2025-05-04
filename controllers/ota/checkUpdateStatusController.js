@@ -7,14 +7,20 @@ const checkUpdateStatus = async (req, res) => {
     const customer = await Customer.findById(customerId);
     if (!customer) return res.status(404).json({ error: "Customer not found" });
 
-    const updateType = customer.updateStatus.frontend.available
-      ? "frontend"
-      : customer.updateStatus.backend.available
-      ? "backend"
-      : null;
+    // चेक करें कि कौन सा अपडेट उपलब्ध है
+    let updateAvailable = false;
+    let updateType = null;
+
+    if (customer.updateStatus.frontend.available && !customer.updateStatus.frontend.pushed) {
+      updateAvailable = true;
+      updateType = "frontend";
+    } else if (customer.updateStatus.backend.available && !customer.updateStatus.backend.pushed) {
+      updateAvailable = true;
+      updateType = "backend";
+    }
 
     res.json({
-      updateAvailable: !!updateType,
+      updateAvailable,
       updateType,
     });
   } catch (err) {

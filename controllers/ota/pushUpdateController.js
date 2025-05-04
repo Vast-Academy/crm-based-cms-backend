@@ -3,13 +3,12 @@ const fs = require("fs");
 const simpleGit = require("simple-git");
 const OtaCustomer = require("../../models/ota/Customer");
 
-const privateKey = fs.readFileSync(path.join(__dirname, "../../config/private-key.pem"), "utf8");
 
 const getInstallationAccessToken = async (installationId) => {
   const { createAppAuth } = await import('@octokit/auth-app');
   const auth = createAppAuth({
     appId: process.env.GITHUB_APP_ID,
-    privateKey,
+    privateKey: process.env.GITHUB_PRIVATE_KEY.replace(/\\n/g, '\n'),
     clientId: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
   });
@@ -50,6 +49,11 @@ const pushUpdateToRepo = async (req, res) => {
     await git.add(".");
     await git.commit(`OTA Update - ${updateType} - ${new Date().toISOString()}`);
     await git.push("origin", "main", ["--force"]);
+
+    // Update the customer record to mark the update as pushed
+    await OtaCustomer.findByIdAndUpdate(customerId, {
+      [`updateStatus.${updateType}.pushed`]: true,
+    });
 
     fs.rmSync(tmpFolder, { recursive: true, force: true });
 
