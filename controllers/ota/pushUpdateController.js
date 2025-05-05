@@ -33,7 +33,7 @@ const pushUpdateToRepo = async (req, res) => {
   const installationId = customer.githubInstallationId;
 
   const repoPath = path.join(__dirname, `../../updates/${updateType}`);
-  const tmpFolder = path.join(__dirname, `../../../temp-push-${Date.now()}`);
+  const tmpFolder = path.join(__dirname, `../../temp-push-${Date.now()}`);
   fs.mkdirSync(tmpFolder);
 
   // Copy files to a temporary folder
