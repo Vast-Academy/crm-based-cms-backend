@@ -1,6 +1,12 @@
 const Customer = require("../../models/ota/Customer");
 
 const markUpdateAvailable = async (req, res) => {
+  console.log("Request body:", req.body);
+  console.log("Headers:", req.headers);
+  
+  if (!req.body) {
+    return res.status(400).json({ error: "Request body is missing" });
+  }
   const { customerId, updateType } = req.body;
 
   if (!["frontend", "backend"].includes(updateType)) {

@@ -25,12 +25,13 @@ const allowedOrigins = [
   });
 
 app.use('/api/webhooks', webhookRoutes);
-app.use('/api/ota', pushRoutes);
 
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
+
+app.use('/api/ota', pushRoutes);
 
 app.use("/api", router);
 
