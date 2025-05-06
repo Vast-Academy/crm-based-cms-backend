@@ -3,7 +3,6 @@ const fs = require("fs");
 const simpleGit = require("simple-git");
 const OtaCustomer = require("../../models/ota/Customer");
 
-
 const getInstallationAccessToken = async (installationId) => {
   const { createAppAuth } = await import('@octokit/auth-app');
   const auth = createAppAuth({
@@ -20,10 +19,12 @@ const getInstallationAccessToken = async (installationId) => {
 const pushUpdateToRepo = async (req, res) => {
   const { customerId, updateType } = req.body;
 
+  // Validate input parameters
   if (!customerId || !["frontend", "backend"].includes(updateType)) {
     return res.status(400).json({ error: "Missing or invalid parameters" });
   }
 
+  // Fetch customer details
   const customer = await OtaCustomer.findById(customerId);
   if (!customer) {
     return res.status(404).json({ error: "Customer not found" });
@@ -32,18 +33,21 @@ const pushUpdateToRepo = async (req, res) => {
   const repoName = updateType === "frontend" ? customer.frontendRepo : customer.backendRepo;
   const installationId = customer.githubInstallationId;
 
+  // Define paths
   const repoPath = path.join(__dirname, `../../updates/${updateType}`);
-  const tmpFolder = path.join(__dirname, `../../temp-push-${Date.now()}`);
-  fs.mkdirSync(tmpFolder);
-
-  // Copy files to a temporary folder
-  fs.cpSync(repoPath, tmpFolder, { recursive: true });
-
-  const git = simpleGit(tmpFolder);
-  const token = await getInstallationAccessToken(installationId);
-  const remoteUrl = `https://x-access-token:${token}@github.com/${repoName}.git`;
+  const tmpFolder = path.join('/tmp', `ota-push-${updateType}-${customerId}-${Date.now()}`); // Use /tmp for writable directory
 
   try {
+    // Create the temporary directory
+    fs.mkdirSync(tmpFolder, { recursive: true });
+
+    // Copy files to the temporary folder
+    fs.cpSync(repoPath, tmpFolder, { recursive: true });
+
+    const git = simpleGit(tmpFolder);
+    const token = await getInstallationAccessToken(installationId);
+    const remoteUrl = `https://x-access-token:${token}@github.com/${repoName}.git`;
+
     await git.init();
     await git.addRemote("origin", remoteUrl);
     await git.add(".");
@@ -55,12 +59,16 @@ const pushUpdateToRepo = async (req, res) => {
       [`updateStatus.${updateType}.pushed`]: true,
     });
 
-    fs.rmSync(tmpFolder, { recursive: true, force: true });
-
     return res.status(200).json({ success: true, message: `${updateType} update pushed.` });
   } catch (err) {
     console.error("Push failed:", err);
     return res.status(500).json({ error: "Update push failed", detail: err.message });
+  } finally {
+    // Clean up the temporary folder
+    if (fs.existsSync(tmpFolder)) {
+      fs.rmSync(tmpFolder, { recursive: true, force: true });
+      console.log(`Cleaned up temporary folder: ${tmpFolder}`);
+    }
   }
 };
 
