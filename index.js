@@ -10,6 +10,8 @@ const pushRoutes = require('./routes/ota/pushRoutes');
 const app = express()
 const allowedOrigins = [
     'https://crm-based-cms-frontend.vercel.app', 
+    'https://www.codeonwork.in',
+    'https://codeonwork.in',
     process.env.FORNTEND_URL, // आपके .env से
     'http://localhost:3000' // लोकल डेवलपमेंट के लिए
   ];
