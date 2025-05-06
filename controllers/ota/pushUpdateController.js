@@ -53,19 +53,30 @@ const pushUpdateToRepo = async (req, res) => {
     await git.addConfig('user.email', 'syncvap@gmail.com');
     await git.addRemote("origin", remoteUrl);
     await git.add(".");
-    await git.commit(`OTA Update - ${updateType} - ${new Date().toISOString()}`);
-    await git.push("origin", "main", ["--force"]);
 
+    
+    const status = await git.status();
+    if (status.files.length > 0) {
+      await git.commit(`OTA Update - ${updateType} - ${new Date().toISOString()}`);
+    } else {
+      console.log("No changes to commit.");
+      return res.status(200).json({ success: true, message: "No changes to push." });
+    }
+    // Check if 'main' branch exists
+    const branches = await git.branch();
+    if (!branches.all.includes('main')) {
+      await git.checkoutLocalBranch('main'); // Create and switch to 'main' branch if it doesn't exist
+    }
+    await git.push("origin", "main", ["--force"]);
     // Update the customer record to mark the update as pushed
     await OtaCustomer.findByIdAndUpdate(customerId, {
       [`updateStatus.${updateType}.pushed`]: true,
     });
-
     return res.status(200).json({ success: true, message: `${updateType} update pushed.` });
   } catch (err) {
     console.error("Push failed:", err);
     return res.status(500).json({ error: "Update push failed", detail: err.message });
-  } finally {
+  }finally {
     // Clean up the temporary folder
     if (fs.existsSync(tmpFolder)) {
       fs.rmSync(tmpFolder, { recursive: true, force: true });
