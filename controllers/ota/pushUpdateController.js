@@ -46,7 +46,7 @@ const pushUpdateToRepo = async (req, res) => {
 
     const git = simpleGit(tmpFolder);
     const token = await getInstallationAccessToken(installationId);
-    const remoteUrl = `https://x-access-token:${token}@github.com/${repoName}.git`;
+    const remoteUrl = `https://x-access-token:${token}@github.com/${repoName}`;
 
     await git.init();
     await git.addConfig('user.name', 'Vast-Academy');
