@@ -49,6 +49,8 @@ const pushUpdateToRepo = async (req, res) => {
     const remoteUrl = `https://x-access-token:${token}@github.com/${repoName}.git`;
 
     await git.init();
+    await git.addConfig('user.name', 'Vast-Academy');
+    await git.addConfig('user.email', 'syncvap@gmail.com');
     await git.addRemote("origin", remoteUrl);
     await git.add(".");
     await git.commit(`OTA Update - ${updateType} - ${new Date().toISOString()}`);
