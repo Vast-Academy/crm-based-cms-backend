@@ -7,9 +7,11 @@ import {
 import SummaryApi from '../common';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import UpdatePopup from "../components/UpdatePopup";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const customerId = localStorage.getItem('customerId');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [technicianStats, setTechnicianStats] = useState([]);
@@ -586,7 +588,6 @@ const Dashboard = () => {
           <p className="text-gray-600">Welcome back to your CRM dashboard</p>
         </div>
         
-
         {/* Refresh button */}
         <button 
           onClick={() => fetchFreshDashboardData()}
@@ -707,6 +708,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      <UpdatePopup customerId= "6817a3153feacd69e76bc649" />
     </div>
   );
 };
