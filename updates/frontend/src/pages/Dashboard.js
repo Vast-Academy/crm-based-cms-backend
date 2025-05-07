@@ -11,7 +11,6 @@ import UpdatePopup from "../components/UpdatePopup";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const customerId = localStorage.getItem('customerId');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [technicianStats, setTechnicianStats] = useState([]);
@@ -708,7 +707,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <UpdatePopup customerId= "6817a3153feacd69e76bc649" />
+     <UpdatePopup />
     </div>
   );
 };
