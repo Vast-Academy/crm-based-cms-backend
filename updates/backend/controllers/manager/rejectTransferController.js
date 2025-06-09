@@ -66,6 +66,26 @@ const rejectTransferController = async (req, res) => {
     transfer.rejectReason = rejectReason;
     transfer.rejectedAt = new Date();
     await transfer.save();
+
+    // Update corresponding work order status to 'rejected' and add statusHistory entry
+    const customerModel = require('../../models/customerModel');
+    const customer = await customerModel.findOne({
+      'workOrders.orderId': transfer.orderId
+    });
+
+    if (customer) {
+      const workOrder = customer.workOrders.find(wo => wo.orderId === transfer.orderId);
+      if (workOrder) {
+        workOrder.status = 'rejected';
+        workOrder.statusHistory.push({
+          status: 'rejected',
+          remark: rejectReason,
+          updatedBy: userId,
+          updatedAt: new Date()
+        });
+        await customer.save();
+      }
+    }
     
     console.log('Updating old manager status back to active');
     
