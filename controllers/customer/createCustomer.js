@@ -3,7 +3,7 @@ const generateOrderId = require('../../helpers/generateOrderId');
 
 const createCustomer = async (req, res) => {
   try {
-    const { projectType, initialRemark } = req.body;
+    const { projectType, initialRemark, isExistingCustomer, completionDate, installedBy } = req.body;
    
     // Check if project type is provided
     if (!projectType) {
@@ -31,32 +31,52 @@ const createCustomer = async (req, res) => {
       branch = req.user.branch;
     }
    
-    // Generate project ID and order ID
+    // Generate project ID
     const projectId = `PRJ-${Date.now().toString().slice(-6)}`;
-    const orderId = await generateOrderId();
     
-    // Create new customer with project and work order
-    const customer = await Customer.create({
+    // Prepare customer data
+    const customerData = {
       ...req.body,
       branch,
       projectType: projectType,
-      projects: [{
+      createdBy: req.user.id,
+      updatedBy: req.user.id
+    };
+
+    if (isExistingCustomer) {
+      // For existing customers, create completed project without work order
+      customerData.projects = [{
+        projectId,
+        projectType,
+        initialRemark,
+        installedBy,
+        completionDate: new Date(completionDate),
+        status: 'completed',
+        createdAt: new Date(completionDate)
+      }];
+      customerData.workOrders = []; // No work order for existing customers
+    } else {
+      // For new customers, create project and work order as before
+      const orderId = await generateOrderId();
+      
+      customerData.projects = [{
         projectId,
         projectType,
         initialRemark,
         createdAt: new Date()
-      }],
-      workOrders: [{
+      }];
+      customerData.workOrders = [{
         orderId,
         projectId,
         projectType,
         status: 'pending',
         initialRemark,
         createdAt: new Date()
-      }],
-      createdBy: req.user.id,
-      updatedBy: req.user.id
-    });
+      }];
+    }
+    
+    // Create new customer
+    const customer = await Customer.create(customerData);
    
     res.status(201).json({
       success: true,

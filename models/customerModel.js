@@ -156,6 +156,18 @@ const customerSchema = new mongoose.Schema({
     initialRemark: {
       type: String
     },
+    installedBy: {
+      type: String,
+      enum: ['Our Company', 'Others']
+    },
+    completionDate: {
+      type: Date
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'in-progress', 'completed'],
+      default: 'pending'
+    },
     completedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
