@@ -43,6 +43,11 @@ const createCustomer = async (req, res) => {
       updatedBy: req.user.id
     };
 
+    // Set customer status if provided
+    if (req.body.customerStatus) {
+      customerData.customerStatus = req.body.customerStatus;
+    }
+
     if (isExistingCustomer) {
       // For existing customers, create completed project without work order
       customerData.projects = [{
