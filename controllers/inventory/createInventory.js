@@ -17,7 +17,9 @@ const createInventory = async (req, res) => {
       warranty,
       mrp,
       purchasePrice,
-      salePrice
+      customerPrice,
+      dealerPrice,
+      distributorPrice
     } = req.body;
    
     // Check if item with same ID already exists
@@ -46,8 +48,21 @@ const createInventory = async (req, res) => {
     let newItemData = {
       id,
       type,
-      name,
-      salePrice,
+      name
+    };
+
+    // Add multi-tier pricing - required for all items
+    if (!customerPrice || !dealerPrice || !distributorPrice) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer price, dealer price, and distributor price are all required'
+      });
+    }
+
+    newItemData.pricing = {
+      customerPrice,
+      dealerPrice,
+      distributorPrice
     };
    
     // Add additional fields for product types only

@@ -81,6 +81,30 @@ const findByReplacementSerial = require('../controllers/manager/findByReplacemen
 const updateWarrantyClaim = require('../controllers/manager/updateWarrantyClaim');
 const { resetSystem } = require('../controllers/user/resetSystem');
 
+// Dealer controllers
+const createDealer = require('../controllers/dealer/createDealer');
+const getAllDealers = require('../controllers/dealer/getAllDealers');
+const getDealer = require('../controllers/dealer/getDealer');
+const updateDealer = require('../controllers/dealer/updateDealer');
+const addDealerRemark = require('../controllers/dealer/addDealerRemark');
+
+// Distributor controllers
+const createDistributor = require('../controllers/distributor/createDistributor');
+const getAllDistributors = require('../controllers/distributor/getAllDistributors');
+const getDistributor = require('../controllers/distributor/getDistributor');
+const updateDistributor = require('../controllers/distributor/updateDistributor');
+const addDistributorRemark = require('../controllers/distributor/addDistributorRemark');
+
+// Sales controllers
+const createSalesBill = require('../controllers/sales/createSalesBill');
+const getSalesBills = require('../controllers/sales/getSalesBills');
+const getSalesBillDetails = require('../controllers/sales/getSalesBillDetails');
+const processPayment = require('../controllers/sales/processPayment');
+const generateQRCode = require('../controllers/sales/generateQRCode');
+const getDealerBills = require('../controllers/sales/getDealerBills');
+const getDistributorBills = require('../controllers/sales/getDistributorBills');
+const processBulkPayment = require('../controllers/sales/processBulkPayment');
+
 
 // Login 
 router.post("/login", loginController);
@@ -176,6 +200,29 @@ router.get("/inventory-by-type/:type", authToken, getInventoryByType);
 router.post("/assign-inventory-technician", authToken, assignInventoryToTechnician);
 router.get("/get-technician-inventory", authToken, getTechnicianInventory);
 
+// Dealer routes
+router.post("/create-dealer", authToken, createDealer);
+router.get("/get-all-dealers", authToken, getAllDealers);
+router.get("/get-dealer/:id", authToken, getDealer);
+router.post("/update-dealer/:id", authToken, updateDealer);
+router.post("/dealer-remarks/:id", authToken, addDealerRemark);
+
+// Distributor routes  
+router.post("/create-distributor", authToken, createDistributor);
+router.get("/get-all-distributors", authToken, getAllDistributors);
+router.get("/get-distributor/:id", authToken, getDistributor);
+router.post("/update-distributor/:id", authToken, updateDistributor);
+router.post("/distributor-remarks/:id", authToken, addDistributorRemark);
+
+// Sales routes
+router.post("/create-sales-bill", authToken, createSalesBill);
+router.get("/get-sales-bills", authToken, getSalesBills);
+router.get("/get-bill-details/:billId", authToken, getSalesBillDetails);
+router.post("/process-payment/:billId", authToken, processPayment);
+router.get("/generate-qr/:billId", authToken, generateQRCode);
+router.get("/get-dealer-bills/:dealerId", authToken, getDealerBills);
+router.get("/get-distributor-bills/:distributorId", authToken, getDistributorBills);
+router.post("/process-bulk-payment", authToken, processBulkPayment);
 
 router.post("/reject-technician-project-transfer", authToken, rejectTechnicianProjectTransfer);
 router.post("/reject-bill", authToken, rejectBill);

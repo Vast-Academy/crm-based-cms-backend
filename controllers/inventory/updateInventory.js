@@ -3,7 +3,17 @@ const Item = require('../../models/inventoryModel');
 // Check if your updateInventory controller is properly updating all fields
 const updateInventory = async (req, res) => {
   try {
-    const { type, name, unit, warranty, mrp, purchasePrice, salePrice } = req.body;
+    const { 
+      type, 
+      name, 
+      unit, 
+      warranty, 
+      mrp, 
+      purchasePrice, 
+      customerPrice, 
+      dealerPrice, 
+      distributorPrice
+    } = req.body;
     
     // Find the item
     const item = await Item.findOne({ id: req.params.id });
@@ -27,7 +37,15 @@ const updateInventory = async (req, res) => {
       if (purchasePrice !== undefined) item.purchasePrice = purchasePrice;
     }
     
-    if (salePrice !== undefined) item.salePrice = salePrice;
+    // Update multi-tier pricing
+    if (customerPrice !== undefined && dealerPrice !== undefined && distributorPrice !== undefined) {
+      item.pricing = {
+        customerPrice,
+        dealerPrice,
+        distributorPrice
+      };
+    }
+    
     item.updatedAt = new Date();
     
     await item.save();
