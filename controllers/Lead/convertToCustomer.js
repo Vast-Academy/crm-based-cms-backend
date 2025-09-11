@@ -57,6 +57,7 @@ const convertToCustomer = async (req, res) => {
       projects: [{
         projectId,
         projectType,
+        projectCategory: 'New Installation',
         initialRemark,
         createdAt: new Date()
       }],
@@ -64,6 +65,7 @@ const convertToCustomer = async (req, res) => {
         orderId,
         projectId,
         projectType,
+        projectCategory: 'New Installation',
         status: 'pending',
         initialRemark,
         createdAt: new Date()

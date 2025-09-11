@@ -28,6 +28,14 @@ const createWorkOrder = async (req, res) => {
    
     // Generate order ID
     const orderId = await generateOrderId(); // Custom function to generate unique order IDs
+    
+    // Validate orderId generation
+    if (!orderId) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to generate order ID'
+      });
+    }
    
     // Default project category to "New Installation" if not provided
     // With this logic

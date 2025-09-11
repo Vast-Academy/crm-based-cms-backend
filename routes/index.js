@@ -44,6 +44,7 @@ const rejectTechnicianProjectTransfer = require('../controllers/manager/rejectTe
 const getRejectedTransfersController = require('../controllers/manager/getRejectedTransfersController');
 const getAllWorkOrders = require('../controllers/customer/getAllWorkOrders');
 const createWorkOrder = require('../controllers/customer/createWorkOrder');
+const addComplaint = require('../controllers/customer/addComplaint');
 const assignTechnician = require('../controllers/customer/assignTechnician');
 const assignInventoryToTechnician = require('../controllers/inventory/assignInventoryToTechnician');
 const getTechnicianInventory = require('../controllers/technician/getTechnicianInventory');
@@ -160,6 +161,7 @@ router.get("/get-single-customer/:id", authToken, getCustomer);
 router.post("/update-customer/:id", authToken, updateCustomer);
 router.get("/get-work-orders", authToken, getAllWorkOrders);
 router.post("/create-work-orders", authToken, createWorkOrder);
+router.post("/add-complaint/:customerId", authToken, addComplaint);
 router.post("/assign-technician", authToken, assignTechnician);
 
 // Inventory

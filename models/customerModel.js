@@ -4,8 +4,7 @@ const mongoose = require('mongoose');
 const workOrderSchema = new mongoose.Schema({
   orderId: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   projectId: {
     type: String,
@@ -216,6 +215,18 @@ const customerSchema = new mongoose.Schema({
 
 // Create index for search optimization
 customerSchema.index({ name: 'text', phoneNumber: 'text', email: 'text' });
+
+// Create unique index for workOrders.orderId with partial filter
+// Only creates index for documents that have workOrders with orderId that is a string
+customerSchema.index(
+  { 'workOrders.orderId': 1 }, 
+  { 
+    unique: true, 
+    partialFilterExpression: { 
+      'workOrders.orderId': { $type: 'string' }
+    } 
+  }
+);
 
 const customerModel = mongoose.model('Customer', customerSchema);
 

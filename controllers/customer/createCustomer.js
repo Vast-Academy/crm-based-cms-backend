@@ -53,6 +53,7 @@ const createCustomer = async (req, res) => {
       customerData.projects = [{
         projectId,
         projectType,
+        projectCategory: 'New Installation',
         initialRemark,
         installedBy,
         completionDate: new Date(completionDate),
@@ -67,6 +68,7 @@ const createCustomer = async (req, res) => {
       customerData.projects = [{
         projectId,
         projectType,
+        projectCategory: 'New Installation',
         initialRemark,
         createdAt: new Date()
       }];
@@ -74,6 +76,7 @@ const createCustomer = async (req, res) => {
         orderId,
         projectId,
         projectType,
+        projectCategory: 'New Installation',
         status: 'pending',
         initialRemark,
         createdAt: new Date()
