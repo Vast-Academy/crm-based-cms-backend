@@ -153,11 +153,11 @@ const createWorkOrderBill = async (req, res) => {
           type: 'serialized-product',
           serialNumber: billItem.serialNumber,
           quantity: 1,
-          price: inventoryItem.item.salePrice || 0,
-          amount: inventoryItem.item.salePrice || 0
+          price: inventoryItem.item.pricing?.customerPrice || inventoryItem.item.salePrice || 0,
+          amount: inventoryItem.item.pricing?.customerPrice || inventoryItem.item.salePrice || 0
         });
         
-        totalAmount += inventoryItem.item.salePrice || 0;
+        totalAmount += inventoryItem.item.pricing?.customerPrice || inventoryItem.item.salePrice || 0;
       }  else {
         // For generic items, check if quantity is available
         if (inventoryItem.genericQuantity < billItem.quantity) {
@@ -180,11 +180,11 @@ const createWorkOrderBill = async (req, res) => {
           name: inventoryItem.item.name,
           type: 'generic-product',
           quantity: billItem.quantity,
-          price: inventoryItem.item.salePrice || 0,
-          amount: (inventoryItem.item.salePrice || 0) * billItem.quantity
+          price: inventoryItem.item.pricing?.customerPrice || inventoryItem.item.salePrice || 0,
+          amount: (inventoryItem.item.pricing?.customerPrice || inventoryItem.item.salePrice || 0) * billItem.quantity
         });
         
-        totalAmount += (inventoryItem.item.salePrice || 0) * billItem.quantity;
+        totalAmount += (inventoryItem.item.pricing?.customerPrice || inventoryItem.item.salePrice || 0) * billItem.quantity;
       }
     }
     

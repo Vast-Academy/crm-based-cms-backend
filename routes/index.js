@@ -104,6 +104,9 @@ const generateQRCode = require('../controllers/sales/generateQRCode');
 const getDealerBills = require('../controllers/sales/getDealerBills');
 const getDistributorBills = require('../controllers/sales/getDistributorBills');
 const processBulkPayment = require('../controllers/sales/processBulkPayment');
+const getCustomerBills = require('../controllers/sales/getCustomerBills');
+const createCustomerBill = require('../controllers/sales/createCustomerBill');
+const processCustomerBulkPayment = require('../controllers/sales/processCustomerBulkPayment');
 
 
 // Login 
@@ -223,6 +226,9 @@ router.get("/generate-qr/:billId", authToken, generateQRCode);
 router.get("/get-dealer-bills/:dealerId", authToken, getDealerBills);
 router.get("/get-distributor-bills/:distributorId", authToken, getDistributorBills);
 router.post("/process-bulk-payment", authToken, processBulkPayment);
+router.get("/get-customer-bills/:customerId", authToken, getCustomerBills);
+router.post("/create-customer-bill", authToken, createCustomerBill);
+router.post("/process-customer-bulk-payment", authToken, processCustomerBulkPayment);
 
 router.post("/reject-technician-project-transfer", authToken, rejectTechnicianProjectTransfer);
 router.post("/reject-bill", authToken, rejectBill);

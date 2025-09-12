@@ -28,7 +28,7 @@ const getTechnicianInventory = async (req, res) => {
           itemName: item.name,
           type: item.type,
           unit: item.unit,
-          salePrice: item.salePrice,
+          salePrice: item.pricing?.customerPrice || item.salePrice || 0, // Use customer price for technician billing
           serializedItems: inventory.serializedItems,
           genericQuantity: inventory.genericQuantity,
           lastUpdated: inventory.updatedAt || inventory.createdAt
@@ -45,7 +45,7 @@ const getTechnicianInventory = async (req, res) => {
         itemId: service.id || service._id.toString(),
         itemName: service.name,
         type: service.type,
-        salePrice: service.salePrice,
+        salePrice: service.pricing?.customerPrice || service.salePrice || 0, // Use customer price for technician billing
         // Services don't have these properties but adding them for consistency
         unit: 'N/A',
         serializedItems: [],

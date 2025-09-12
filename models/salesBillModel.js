@@ -36,7 +36,7 @@ const salesBillSchema = new mongoose.Schema({
   },
   customerType: {
     type: String,
-    enum: ['dealer', 'distributor'],
+    enum: ['dealer', 'distributor', 'customer'],
     required: true
   },
   customerId: {
@@ -47,7 +47,7 @@ const salesBillSchema = new mongoose.Schema({
   customerModel: {
     type: String,
     required: true,
-    enum: ['Dealer', 'Distributor']
+    enum: ['Dealer', 'Distributor', 'Customer']
   },
   customerName: {
     type: String,
