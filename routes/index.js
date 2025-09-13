@@ -18,6 +18,8 @@ const getLead = require('../controllers/Lead/getLead');
 const updateLead = require('../controllers/Lead/updateLead');
 const addRemark = require('../controllers/Lead/addRemark');
 const convertToCustomer = require('../controllers/Lead/convertToCustomer');
+const convertToDealer = require('../controllers/Lead/convertToDealer');
+const convertToDistributor = require('../controllers/Lead/convertToDistributor');
 const getAllCustomers = require('../controllers/customer/getAllCustomers');
 const createCustomer = require('../controllers/customer/createCustomer');
 const getCustomer = require('../controllers/customer/getCustomer');
@@ -179,7 +181,9 @@ router.post("/create-Lead", authToken, createLead);
 router.get("/get-single-lead/:id", authToken, getLead);
 router.post("/update-lead/:id", authToken, updateLead);
 router.post("/lead-remarks/:id", authToken, addRemark);
-router.post("/lead-convert/:id", authToken, convertToCustomer)
+router.post("/lead-convert/:id", authToken, convertToCustomer);
+router.post("/lead-convert-dealer/:id", authToken, convertToDealer);
+router.post("/lead-convert-distributor/:id", authToken, convertToDistributor);
 
 // Customer
 router.get("/get-all-customers", authToken, getAllCustomers);

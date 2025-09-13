@@ -86,6 +86,18 @@ const leadSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Customer'
   },
+  convertedToDealer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Dealer'
+  },
+  convertedToDistributor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Distributor'
+  },
+  convertedType: {
+    type: String,
+    enum: ['customer', 'dealer', 'distributor']
+  },
   convertedAt: {
     type: Date
   },

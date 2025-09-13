@@ -78,6 +78,7 @@ const convertToCustomer = async (req, res) => {
     await Lead.findByIdAndUpdate(req.params.id, {
       isConverted: true,
       convertedToCustomer: customer._id,
+      convertedType: 'customer',
       convertedAt: Date.now(),
       updatedBy: req.user.id,
       updatedAt: Date.now()
