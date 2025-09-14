@@ -8,6 +8,12 @@ const getManagersController = require('../controllers/admin/getManagersControlle
 const addManagerController = require('../controllers/admin/addManagerController');
 const getTechniciansController = require('../controllers/admin/getTechniciansController');
 const addTechnicianController = require('../controllers/admin/addTechnicianController');
+
+// Bank Account controllers
+const getBankAccountsController = require('../controllers/admin/getBankAccountsController');
+const addBankAccountController = require('../controllers/admin/addBankAccountController');
+const updateBankAccountController = require('../controllers/admin/updateBankAccountController');
+const deleteBankAccountController = require('../controllers/admin/deleteBankAccountController');
 const getBranchesController = require('../controllers/admin/getBranchesController');
 const addBranchController = require('../controllers/admin/addBranchController');
 const updateUserStatusController = require('../controllers/admin/updateUserStatusController');
@@ -133,6 +139,12 @@ router.post("/add-branches", authToken, addBranchController);
 router.post("/user-status", authToken, updateUserStatusController);
 router.get("/get-manager-detail/:managerId", authToken, getManagerByIdController);
 router.post("/admin-change-password/:id", authToken, adminChangePasswordController);
+
+// Bank Accounts (Admin only)
+router.get("/get-bank-accounts", authToken, getBankAccountsController);
+router.post("/add-bank-account", authToken, addBankAccountController);
+router.put("/update-bank-account/:accountId", authToken, updateBankAccountController);
+router.delete("/delete-bank-account/:accountId", authToken, deleteBankAccountController);
 
 // Manager
 router.get("/manager-get-technician", authToken, getBranchTechniciansController);
