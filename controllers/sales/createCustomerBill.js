@@ -46,7 +46,7 @@ async function updateInventoryStock(soldItems, userBranch) {
 
 async function createCustomerBill(req, res) {
   try {
-    const { customerId, items, paymentMethod, paidAmount, transactionId, notes } = req.body;
+    const { customerId, items, paymentMethod, paidAmount, receivedAmount, transactionId, paymentDetails, notes } = req.body;
 
     // Validation
     if (!customerId || !items || !Array.isArray(items) || items.length === 0) {
@@ -56,10 +56,10 @@ async function createCustomerBill(req, res) {
       });
     }
 
-    if (!paymentMethod || !['cash', 'online'].includes(paymentMethod)) {
+    if (!paymentMethod || !['cash', 'upi', 'bank_transfer', 'cheque'].includes(paymentMethod)) {
       return res.status(400).json({
         success: false,
-        message: "Valid payment method (cash/online) is required"
+        message: "Payment method must be cash, upi, bank_transfer, or cheque"
       });
     }
 
@@ -191,7 +191,9 @@ async function createCustomerBill(req, res) {
       paymentStatus: paidAmount >= subtotal ? 'completed' : (paidAmount > 0 ? 'partial' : 'pending'),
       paidAmount: paidAmount || 0,
       dueAmount: subtotal - (paidAmount || 0),
-      transactionId: paymentMethod === 'online' ? transactionId : null,
+      receivedAmount: receivedAmount || paidAmount || 0,
+      transactionId: transactionId || null,
+      paymentDetails: paymentDetails || undefined,
       notes: notes || '',
       branch: req.userBranch,
       createdBy: req.userId

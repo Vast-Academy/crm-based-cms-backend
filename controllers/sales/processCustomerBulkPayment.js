@@ -5,8 +5,10 @@ async function processCustomerBulkPayment(req, res) {
     const {
       customerId,
       paymentAmount,
-      paymentMethod, // 'cash' or 'online'
+      receivedAmount,
+      paymentMethod, // 'cash', 'upi', 'bank_transfer', 'cheque'
       transactionId,
+      paymentDetails,
       notes
     } = req.body;
 
@@ -18,10 +20,10 @@ async function processCustomerBulkPayment(req, res) {
       });
     }
 
-    if (!['cash', 'online'].includes(paymentMethod)) {
+    if (!['cash', 'upi', 'bank_transfer', 'cheque'].includes(paymentMethod)) {
       return res.status(400).json({
         success: false,
-        message: "Payment method must be either 'cash' or 'online'"
+        message: "Payment method must be cash, upi, bank_transfer, or cheque"
       });
     }
 
@@ -75,9 +77,21 @@ async function processCustomerBulkPayment(req, res) {
         bill.paymentStatus = 'partial';
       }
 
-      // Add payment transaction info if provided
-      if (transactionId && paymentMethod === 'online') {
+      // Add payment transaction info and details if provided
+      if (transactionId) {
         bill.transactionId = transactionId;
+      }
+
+      // Add enhanced payment details
+      if (paymentDetails && Object.keys(paymentDetails).length > 0) {
+        bill.paymentDetails = { ...bill.paymentDetails, ...paymentDetails };
+      }
+
+      // Set received amount for bank transfers
+      if (paymentMethod === 'bank_transfer' && receivedAmount) {
+        bill.receivedAmount = bill.receivedAmount + parseFloat(receivedAmount);
+      } else if (paymentMethod !== 'bank_transfer') {
+        bill.receivedAmount = bill.receivedAmount + paymentForThisBill;
       }
 
       await bill.save();
@@ -109,8 +123,10 @@ async function processCustomerBulkPayment(req, res) {
       message: "Payment processed successfully",
       data: {
         paymentAmount,
+        receivedAmount: receivedAmount || paymentAmount,
         paymentMethod,
         transactionId: transactionId || null,
+        paymentDetails: paymentDetails || null,
         updatedBills,
         summary: updatedSummary,
         notes: notes || ''
