@@ -89,6 +89,10 @@ const findByReplacementSerial = require('../controllers/manager/findByReplacemen
 const updateWarrantyClaim = require('../controllers/manager/updateWarrantyClaim');
 const { resetSystem } = require('../controllers/user/resetSystem');
 
+// Profile picture upload controllers and middleware
+const { uploadProfilePictureController, deleteProfilePictureController } = require('../controllers/user/uploadProfilePictureController');
+const { upload, handleUploadError } = require('../middleware/upload');
+
 // Dealer controllers
 const createDealer = require('../controllers/dealer/createDealer');
 const getAllDealers = require('../controllers/dealer/getAllDealers');
@@ -126,6 +130,10 @@ router.post("/update-user/:id", authToken, updateUserController);
 router.delete("/delete-user/:id", authToken, deleteUserController);
 router.post("/change-password/:id", authToken, changePasswordController);
 router.post("/reset-system", authToken, resetSystem);
+
+// Profile Picture
+router.post("/upload-profile-picture", authToken, upload.single('profileImage'), handleUploadError, uploadProfilePictureController);
+router.delete("/delete-profile-picture", authToken, deleteProfilePictureController);
 
 // Admin
 router.get("/get-admins", authToken, getAdminUsersController);

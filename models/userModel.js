@@ -43,6 +43,14 @@ const UserSchema = new mongoose.Schema({
       return this.role === 'manager' ? 'active' : undefined;
     }
   },
+  profileImage: {
+    type: String,
+    default: null
+  },
+  profileImagePublicId: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
