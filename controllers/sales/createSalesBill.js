@@ -53,7 +53,9 @@ async function createSalesBill(req, res) {
       items,
       paymentMethod,
       paidAmount,
+      receivedAmount,
       transactionId,
+      paymentDetails,
       notes
     } = req.body;
 
@@ -72,10 +74,10 @@ async function createSalesBill(req, res) {
       });
     }
 
-    if (!['cash', 'online'].includes(paymentMethod)) {
+    if (!['cash', 'upi', 'bank_transfer', 'cheque'].includes(paymentMethod)) {
       return res.status(400).json({
         success: false,
-        message: "Payment method must be either 'cash' or 'online'"
+        message: "Payment method must be cash, upi, bank_transfer, or cheque"
       });
     }
 
@@ -194,6 +196,7 @@ async function createSalesBill(req, res) {
     // Calculate final amounts
     const total = subtotal;
     const paidAmountValue = paidAmount || 0;
+    const receivedAmountValue = receivedAmount || paidAmountValue; // For bank transfer, use receivedAmount
     const dueAmount = Math.max(0, total - paidAmountValue);
 
     // Determine payment status
@@ -216,6 +219,52 @@ async function createSalesBill(req, res) {
     const sequence = String(billCount + 1).padStart(4, '0');
     const billNumber = `SB${year}${month}${sequence}`;
 
+    // Validate method-specific fields
+    let validatedPaymentDetails = {};
+
+    switch(paymentMethod) {
+      case 'cash':
+        // No additional validation needed for cash
+        break;
+
+      case 'upi':
+        if (paymentDetails?.upiTransactionId) {
+          validatedPaymentDetails.upiTransactionId = paymentDetails.upiTransactionId;
+        }
+        if (paymentDetails?.selectedBankAccount) {
+          validatedPaymentDetails.selectedBankAccount = paymentDetails.selectedBankAccount;
+        }
+        break;
+
+      case 'bank_transfer':
+        if (!paymentDetails?.utrNumber) {
+          return res.status(400).json({
+            success: false,
+            message: "UTR number is required for bank transfer"
+          });
+        }
+        validatedPaymentDetails.utrNumber = paymentDetails.utrNumber;
+        validatedPaymentDetails.bankName = paymentDetails.bankName || '';
+        validatedPaymentDetails.transferDate = paymentDetails.transferDate || new Date();
+        break;
+
+      case 'cheque':
+        if (!paymentDetails?.chequeNumber || !paymentDetails?.chequeAmount) {
+          return res.status(400).json({
+            success: false,
+            message: "Cheque number and amount are required"
+          });
+        }
+        validatedPaymentDetails.chequeNumber = paymentDetails.chequeNumber;
+        validatedPaymentDetails.chequeBank = paymentDetails.chequeBank || '';
+        validatedPaymentDetails.chequeIfsc = paymentDetails.chequeIfsc || '';
+        validatedPaymentDetails.chequeDate = paymentDetails.chequeDate || new Date();
+        validatedPaymentDetails.chequeAmount = paymentDetails.chequeAmount;
+        validatedPaymentDetails.drawerName = paymentDetails.drawerName || customer.name;
+        validatedPaymentDetails.chequeStatus = paymentDetails.chequeStatus || 'received';
+        break;
+    }
+
     // Create sales bill data
     const billData = {
       billNumber,
@@ -230,17 +279,19 @@ async function createSalesBill(req, res) {
       paymentMethod,
       paymentStatus,
       paidAmount: paidAmountValue,
+      receivedAmount: receivedAmountValue,
       dueAmount,
       transactionId: transactionId || null,
+      paymentDetails: validatedPaymentDetails,
       notes: notes || '',
       branch: req.user.branch || customer.branch,
       createdBy: req.userId
     };
 
-    // Generate QR code data for online payments
-    if (paymentMethod === 'online' && dueAmount > 0) {
-      // Simple UPI string format - in real implementation, use proper UPI URL generator
-      billData.qrCodeData = `upi://pay?pa=your-upi-id@bank&pn=Your Business Name&am=${dueAmount}&cu=INR&tn=Bill Payment`;
+    // Generate QR code data for UPI payments
+    if (paymentMethod === 'upi' && dueAmount > 0) {
+      // QR code data will be generated in frontend based on selected bank account
+      billData.qrCodeData = `upi://pay?am=${dueAmount}&cu=INR&tn=Bill Payment-${billNumber}`;
     }
 
     const salesBill = new SalesBill(billData);

@@ -68,7 +68,7 @@ const salesBillSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['cash', 'online'],
+    enum: ['cash', 'upi', 'bank_transfer', 'cheque'],
     required: true
   },
   paymentStatus: {
@@ -84,11 +84,41 @@ const salesBillSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  receivedAmount: {
+    type: Number,
+    default: function() { return this.paidAmount; }
+  },
   transactionId: {
     type: String
   },
   qrCodeData: {
     type: String
+  },
+  paymentDetails: {
+    // For Bank Transfer (IMPS)
+    utrNumber: { type: String },
+    bankName: { type: String },
+    transferDate: { type: Date },
+
+    // For Cheque
+    chequeNumber: { type: String },
+    chequeBank: { type: String },
+    chequeIfsc: { type: String },
+    chequeDate: { type: Date },
+    chequeAmount: { type: Number },
+    drawerName: { type: String },
+    chequeStatus: {
+      type: String,
+      enum: ['received', 'cleared', 'bounced'],
+      default: 'received'
+    },
+
+    // For UPI (enhanced)
+    upiTransactionId: { type: String },
+    selectedBankAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'BankAccount'
+    }
   },
   notes: {
     type: String

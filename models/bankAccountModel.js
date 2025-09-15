@@ -48,7 +48,7 @@ const BankAccountSchema = new mongoose.Schema({
 
 // Index for better performance
 BankAccountSchema.index({ adminId: 1 });
-BankAccountSchema.index({ accountNumber: 1 });
+// Note: accountNumber index is automatically created by unique: true
 
 // Pre-save middleware to ensure only one primary account per admin
 BankAccountSchema.pre('save', async function(next) {

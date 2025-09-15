@@ -3,11 +3,13 @@ const SalesBill = require('../../models/salesBillModel');
 async function processPayment(req, res) {
   try {
     const { billId } = req.params;
-    const { 
-      paymentAmount, 
-      paymentMethod, 
-      transactionId, 
-      notes 
+    const {
+      paymentAmount,
+      paymentMethod,
+      transactionId,
+      paymentDetails,
+      receivedAmount,
+      notes
     } = req.body;
 
     // Validate required fields
@@ -18,10 +20,10 @@ async function processPayment(req, res) {
       });
     }
 
-    if (!paymentMethod || !['cash', 'online'].includes(paymentMethod)) {
+    if (!paymentMethod || !['cash', 'upi', 'bank_transfer', 'cheque'].includes(paymentMethod)) {
       return res.status(400).json({
         success: false,
-        message: "Valid payment method (cash/online) is required"
+        message: "Valid payment method (cash/upi/bank_transfer/cheque) is required"
       });
     }
 
@@ -54,6 +56,7 @@ async function processPayment(req, res) {
 
     // Calculate new amounts
     const newPaidAmount = bill.paidAmount + parseFloat(paymentAmount);
+    const newReceivedAmount = bill.receivedAmount + parseFloat(receivedAmount || paymentAmount);
     const newDueAmount = Math.max(0, bill.total - newPaidAmount);
 
     // Determine new payment status
@@ -64,12 +67,48 @@ async function processPayment(req, res) {
       newPaymentStatus = 'partial';
     }
 
+    // Validate method-specific payment details
+    let updatedPaymentDetails = { ...bill.paymentDetails };
+
+    if (paymentDetails) {
+      switch(paymentMethod) {
+        case 'upi':
+          if (paymentDetails.upiTransactionId) {
+            updatedPaymentDetails.upiTransactionId = paymentDetails.upiTransactionId;
+          }
+          if (paymentDetails.selectedBankAccount) {
+            updatedPaymentDetails.selectedBankAccount = paymentDetails.selectedBankAccount;
+          }
+          break;
+
+        case 'bank_transfer':
+          if (paymentDetails.utrNumber) {
+            updatedPaymentDetails.utrNumber = paymentDetails.utrNumber;
+          }
+          if (paymentDetails.bankName) {
+            updatedPaymentDetails.bankName = paymentDetails.bankName;
+          }
+          if (paymentDetails.transferDate) {
+            updatedPaymentDetails.transferDate = paymentDetails.transferDate;
+          }
+          break;
+
+        case 'cheque':
+          if (paymentDetails.chequeStatus) {
+            updatedPaymentDetails.chequeStatus = paymentDetails.chequeStatus;
+          }
+          break;
+      }
+    }
+
     // Update bill
     const updateData = {
       paidAmount: newPaidAmount,
+      receivedAmount: newReceivedAmount,
       dueAmount: newDueAmount,
       paymentStatus: newPaymentStatus,
       paymentMethod: paymentMethod, // Update payment method if needed
+      paymentDetails: updatedPaymentDetails,
       updatedBy: req.userId,
       updatedAt: new Date()
     };
