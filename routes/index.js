@@ -26,6 +26,7 @@ const addRemark = require('../controllers/Lead/addRemark');
 const convertToCustomer = require('../controllers/Lead/convertToCustomer');
 const convertToDealer = require('../controllers/Lead/convertToDealer');
 const convertToDistributor = require('../controllers/Lead/convertToDistributor');
+const convertToExistingCustomer = require('../controllers/Lead/convertToExistingCustomer');
 const getAllCustomers = require('../controllers/customer/getAllCustomers');
 const createCustomer = require('../controllers/customer/createCustomer');
 const getCustomer = require('../controllers/customer/getCustomer');
@@ -204,6 +205,7 @@ router.post("/lead-remarks/:id", authToken, addRemark);
 router.post("/lead-convert/:id", authToken, convertToCustomer);
 router.post("/lead-convert-dealer/:id", authToken, convertToDealer);
 router.post("/lead-convert-distributor/:id", authToken, convertToDistributor);
+router.post("/lead-convert-existing-customer/:id", authToken, convertToExistingCustomer);
 
 // Customer
 router.get("/get-all-customers", authToken, getAllCustomers);

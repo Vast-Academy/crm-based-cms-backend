@@ -26,7 +26,7 @@ const managerAddTechnicianController = async (req, res) => {
     
     // Check if username or email already exists
     const existingUser = await User.findOne({
-      $or: [{ username }, { email }]
+      $or: [{ username }]
     });
     
     if (existingUser) {
@@ -49,7 +49,7 @@ const managerAddTechnicianController = async (req, res) => {
       firstName,
       lastName,
       username,
-      email,
+      email: email || undefined,
       password,
       phone,
       role: 'technician',
