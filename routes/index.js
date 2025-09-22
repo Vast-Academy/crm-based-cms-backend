@@ -38,6 +38,8 @@ const stockAdd = require('../controllers/inventory/stockAdd');
 const updateInventory = require('../controllers/inventory/updateInventory');
 const deleteInventory = require('../controllers/inventory/deleteInventory');
 const checkSerialNumber = require('../controllers/inventory/checkSerialNumber');
+const exportInventory = require('../controllers/inventory/exportInventory');
+const importInventory = require('../controllers/inventory/importInventory');
 const getBranchTechniciansController = require('../controllers/manager/getBranchTechniciansController');
 const managerAddTechnicianController = require('../controllers/manager/managerAddTechnicianController');
 const getUserController = require('../controllers/user/getUserController');
@@ -93,6 +95,9 @@ const { resetSystem } = require('../controllers/user/resetSystem');
 // Profile picture upload controllers and middleware
 const { uploadProfilePictureController, deleteProfilePictureController } = require('../controllers/user/uploadProfilePictureController');
 const { upload, handleUploadError } = require('../middleware/upload');
+
+// Excel upload middleware for inventory import
+const { upload: excelUpload, handleUploadError: handleExcelUploadError } = require('../middleware/excelUpload');
 
 // Dealer controllers
 const createDealer = require('../controllers/dealer/createDealer');
@@ -228,6 +233,10 @@ router.get("/check-serial/:serialNumber", authToken, checkSerialNumber);
 router.get("/inventory-by-type/:type", authToken, getInventoryByType);
 router.post("/assign-inventory-technician", authToken, assignInventoryToTechnician);
 router.get("/get-technician-inventory", authToken, getTechnicianInventory);
+
+// Inventory Export/Import routes
+router.get("/export-inventory", authToken, exportInventory);
+router.post("/import-inventory", authToken, excelUpload.single('inventory'), handleExcelUploadError, importInventory);
 
 // Dealer routes
 router.post("/create-dealer", authToken, createDealer);
