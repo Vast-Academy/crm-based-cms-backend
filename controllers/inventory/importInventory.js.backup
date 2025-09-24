@@ -1,5 +1,4 @@
 const Item = require('../../models/inventoryModel');
-const ReturnedInventory = require('../../models/returnedInventoryModel');
 const XLSX = require('xlsx');
 
 const importInventory = async (req, res) => {
@@ -190,50 +189,11 @@ const importInventory = async (req, res) => {
 
       console.log(`Successfully imported ${importResult.length} inventory items`);
 
-      // Handle ObjectId mapping for returned inventory (if MongoDB_ObjectId exists in Excel)
-      let updatedReturnedInventoryEntries = 0;
-      try {
-        // Create mapping between old and new ObjectIds
-        const idMappings = [];
-        for (const newItem of importResult) {
-          const excelRow = jsonData.find(row => row.ID === newItem.id);
-          if (excelRow?.MongoDB_ObjectId) {
-            idMappings.push({
-              oldObjectId: excelRow.MongoDB_ObjectId,
-              newObjectId: newItem._id.toString()
-            });
-          }
-        }
-
-        // Update returned inventory references if mappings exist
-        if (idMappings.length > 0) {
-          console.log(`Processing ${idMappings.length} ObjectId mappings for returned inventory...`);
-
-          for (const mapping of idMappings) {
-            const updateResult = await ReturnedInventory.updateMany(
-              {
-                'items.item': mapping.oldObjectId,
-                status: 'pending'
-              },
-              {
-                $set: { 'items.$.item': mapping.newObjectId }
-              }
-            );
-            updatedReturnedInventoryEntries += updateResult.modifiedCount;
-          }
-
-          console.log(`Updated ${updatedReturnedInventoryEntries} returned inventory entries with new ObjectIds`);
-        }
-      } catch (mappingError) {
-        console.log('ObjectId mapping not performed (Excel may not contain MongoDB_ObjectId column):', mappingError.message);
-      }
-
       res.json({
         success: true,
         message: `Successfully imported ${importResult.length} inventory items`,
         importedCount: importResult.length,
         totalProcessed: jsonData.length,
-        updatedReturnedInventoryEntries: updatedReturnedInventoryEntries,
         importedItems: importResult.map(item => ({
           id: item.id,
           name: item.name,

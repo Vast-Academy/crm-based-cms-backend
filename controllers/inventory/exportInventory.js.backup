@@ -21,7 +21,6 @@ const exportInventory = async (req, res) => {
       return {
         'S.No': index + 1,
         'ID': item.id || '',
-        'MongoDB_ObjectId': item._id.toString(),
         'Name': item.name || '',
         'Type': item.type || '',
         'Unit': item.unit || 'N/A',
@@ -44,7 +43,6 @@ const exportInventory = async (req, res) => {
     const columnWidths = [
       { wch: 6 },  // S.No
       { wch: 15 }, // ID
-      { wch: 25 }, // MongoDB_ObjectId
       { wch: 25 }, // Name
       { wch: 18 }, // Type
       { wch: 10 }, // Unit

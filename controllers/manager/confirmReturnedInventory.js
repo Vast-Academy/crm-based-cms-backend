@@ -36,8 +36,13 @@ const confirmReturnedInventory = async (req, res) => {
     try {
       // Process each returned item
       for (const returnedItem of returnEntry.items) {
+        // Check if the referenced item exists (handle case where item was deleted)
+        if (!returnedItem.item) {
+          throw new Error(`Referenced item not found for returned item. The item may have been deleted.`);
+        }
+
         const item = await Item.findById(returnedItem.item._id).session(session);
-        
+
         if (!item) {
           throw new Error(`Item not found: ${returnedItem.item._id}`);
         }
@@ -104,10 +109,19 @@ const confirmReturnedInventory = async (req, res) => {
     }
   } catch (err) {
     console.error('Error confirming returned inventory:', err);
-    res.status(500).json({
-      success: false,
-      message: 'Server error. Please try again later.'
-    });
+
+    // Handle specific error cases
+    if (err.message.includes('Referenced item not found') || err.message.includes('Item not found')) {
+      res.status(400).json({
+        success: false,
+        message: err.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Server error. Please try again later.'
+      });
+    }
   }
 };
 
