@@ -76,6 +76,8 @@ const getTechnicianProjects = require('../controllers/technician/getTechnicianPr
 const addWorkOrderRemark = require('../controllers/technician/addWorkOrderRemark');
 const getReturnedInventory = require('../controllers/manager/getReturnedInventory');
 const confirmReturnedInventory = require('../controllers/manager/confirmReturnedInventory');
+const rejectReturnedInventory = require('../controllers/manager/rejectReturnedInventory');
+const getTechnicianReturnRequests = require('../controllers/technician/getTechnicianReturnRequests');
 const acceptTechnicianProjectTransfer = require('../controllers/manager/acceptTechnicianProjectTransfer');
 const getSerialNumberDetails = require('../controllers/manager/getSerialNumberDetails');
 const updateSerialNumberStatus = require('../controllers/technician/updateUsedSerialNumbers');
@@ -177,6 +179,8 @@ router.post("/accept-technician-project-transfer", authToken, acceptTechnicianPr
 router.post("/reject-technician-project-transfer", authToken, rejectTechnicianProjectTransfer);
 router.get("/get-returned-inventory", authToken, getReturnedInventory);
 router.post("/confirm-returned-inventory/:returnId", authToken, confirmReturnedInventory);
+router.post("/reject-returned-inventory/:returnId", authToken, rejectReturnedInventory);
+router.get("/get-technician-return-requests", authToken, getTechnicianReturnRequests);
 router.get("/serial-number-detail/:serialNumber", authToken, getSerialNumberDetails);
 router.post("/register-replacement", authToken, registerWarrantyReplacement);
 router.get("/get-replacements", authToken, getAllWarrantyReplacements);
