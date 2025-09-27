@@ -2,8 +2,6 @@ const ReturnedInventory = require('../../models/returnedInventoryModel');
 
 const getTechnicianReturnRequests = async (req, res) => {
   try {
-    console.log('getTechnicianReturnRequests called for user:', req.userId, 'role:', req.userRole);
-
     // Only technicians can view their return requests
     if (req.userRole !== 'technician') {
       return res.status(403).json({
@@ -23,9 +21,6 @@ const getTechnicianReturnRequests = async (req, res) => {
     .populate('rejectedBy', 'firstName lastName username')
     .populate('confirmedBy', 'firstName lastName username')
     .sort('-returnedAt');
-
-    console.log('Found return requests:', returnRequests.length);
-    console.log('Return requests data:', returnRequests);
 
     // Format the response
     const formattedData = returnRequests.map(request => ({
@@ -59,8 +54,6 @@ const getTechnicianReturnRequests = async (req, res) => {
           serialNumber: item.serialNumber || null
         }))
     }));
-
-    console.log('Formatted data being sent:', formattedData);
 
     res.json({
       success: true,
