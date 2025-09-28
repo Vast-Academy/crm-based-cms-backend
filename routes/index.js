@@ -128,6 +128,9 @@ const getCustomerBills = require('../controllers/sales/getCustomerBills');
 const createCustomerBill = require('../controllers/sales/createCustomerBill');
 const processCustomerBulkPayment = require('../controllers/sales/processCustomerBulkPayment');
 
+// Transaction History controllers
+const getTransactionHistory = require('../controllers/transactionHistory/getTransactionHistory');
+
 
 // Login 
 router.post("/login", loginController);
@@ -268,6 +271,9 @@ router.post("/process-bulk-payment", authToken, processBulkPayment);
 router.get("/get-customer-bills/:customerId", authToken, getCustomerBills);
 router.post("/create-customer-bill", authToken, createCustomerBill);
 router.post("/process-customer-bulk-payment", authToken, processCustomerBulkPayment);
+
+// Transaction History routes
+router.get("/transaction-history/:customerId", authToken, getTransactionHistory);
 
 router.post("/reject-technician-project-transfer", authToken, rejectTechnicianProjectTransfer);
 router.post("/reject-bill", authToken, rejectBill);

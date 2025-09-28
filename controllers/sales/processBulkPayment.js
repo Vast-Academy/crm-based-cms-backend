@@ -1,4 +1,5 @@
 const SalesBill = require('../../models/salesBillModel');
+const createTransactionRecord = require('../transactionHistory/createTransactionRecord');
 
 async function processBulkPayment(req, res) {
   try {
@@ -125,6 +126,45 @@ async function processBulkPayment(req, res) {
       totalPaidAfterPayment: allBillsAfterPayment.reduce((sum, bill) => sum + bill.paidAmount, 0),
       pendingBillsCount: allBillsAfterPayment.filter(bill => bill.dueAmount > 0).length
     };
+
+    // Create transaction history record
+    try {
+      // Get customer name from first bill (all bills belong to same customer)
+      const firstBill = pendingBills[0];
+      const customerName = firstBill.customerName || 'Unknown Customer';
+
+      // Prepare related bills info for transaction record
+      const relatedBills = updatedBills.map(bill => ({
+        billNumber: bill.billNumber,
+        allocatedAmount: bill.paymentApplied
+      }));
+
+      // Determine transaction type based on context
+      let transactionType = 'due_payment'; // Default: treating as due payment (existing bills payment)
+
+      // Note: This function handles payments for existing bills (due clearance)
+      // For new bill payments during bill creation, use 'payment_received' type
+
+      await createTransactionRecord({
+        customerId,
+        customerType,
+        customerName,
+        amount: paymentAmount,
+        paymentMethod,
+        transactionId,
+        paymentDetails,
+        relatedBills,
+        notes,
+        branch: req.user.branch,
+        createdBy: req.user._id,
+        transactionType
+      });
+
+      console.log(`Transaction history created for ${customerType} payment: ₹${paymentAmount}`);
+    } catch (transactionError) {
+      console.error('Error creating transaction history:', transactionError);
+      // Continue with response even if transaction history fails
+    }
 
     res.json({
       success: true,

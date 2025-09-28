@@ -2,6 +2,7 @@ const SalesBill = require('../../models/salesBillModel');
 const Dealer = require('../../models/dealerModel');
 const Distributor = require('../../models/distributorModel');
 const Item = require('../../models/inventoryModel');
+const createTransactionRecord = require('../transactionHistory/createTransactionRecord');
 
 // Function to update inventory stock after sale
 async function updateInventoryStock(soldItems, userBranch) {
@@ -299,6 +300,35 @@ async function createSalesBill(req, res) {
 
     // Update inventory stock after successful bill creation
     await updateInventoryStock(processedItems, req.user.branch);
+
+    // Create transaction record if payment was made during bill creation
+    if (paidAmountValue > 0) {
+      try {
+        await createTransactionRecord({
+          customerId,
+          customerType,
+          customerName: customer.name,
+          amount: paidAmountValue,
+          paymentMethod,
+          transactionId: transactionId || null,
+          paymentDetails: validatedPaymentDetails,
+          relatedBills: [{
+            billId: savedBill._id,
+            billNumber: savedBill.billNumber,
+            allocatedAmount: paidAmountValue
+          }],
+          notes: notes || `Payment made during bill creation`,
+          branch: req.user.branch || customer.branch,
+          createdBy: req.userId,
+          transactionType: 'payment_received' // This is bill creation payment
+        });
+
+        console.log(`Transaction history created for bill creation: ${savedBill.billNumber} - ₹${paidAmountValue}`);
+      } catch (transactionError) {
+        console.error('Error creating transaction history for bill creation:', transactionError);
+        // Continue with response even if transaction history fails
+      }
+    }
 
     res.status(201).json({
       success: true,
