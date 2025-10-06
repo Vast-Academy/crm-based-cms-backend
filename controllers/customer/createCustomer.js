@@ -50,15 +50,19 @@ const createCustomer = async (req, res) => {
 
     if (isExistingCustomer) {
       // For existing customers, create completed project without work order
+      // Fix: Create local date to avoid timezone conversion
+      const installationDate = new Date(completionDate + 'T12:00:00.000Z'); // Add noon time in UTC to avoid timezone issues
+      const projectCreationDate = new Date(completionDate + 'T12:00:00.000Z'); // Same date for createdAt
+
       customerData.projects = [{
         projectId,
         projectType,
         projectCategory: 'New Installation',
         initialRemark,
         installedBy,
-        completionDate: new Date(completionDate),
+        completionDate: installationDate,
         status: 'completed',
-        createdAt: new Date(completionDate)
+        createdAt: projectCreationDate
       }];
       customerData.workOrders = []; // No work order for existing customers
     } else {
