@@ -1,6 +1,6 @@
 const Customer = require('../../models/customerModel');
 const generateOrderId = require('../../helpers/generateOrderId');
-// const { sendTemplate, toE164 } = require('../../helpers/whatsapp');
+// const { sendTemplate, toE164 } = require('../../helpers/whatsapp')
 
 const createCustomer = async (req, res) => {
   try {
