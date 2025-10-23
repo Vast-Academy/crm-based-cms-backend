@@ -52,6 +52,7 @@ const initiateTransferController = require('../controllers/manager/initiateTrans
 const acceptTransferController = require('../controllers/manager/acceptTransferController');
 const rejectTransferController = require('../controllers/manager/rejectTransferController');
 const rejectTechnicianProjectTransfer = require('../controllers/manager/rejectTechnicianProjectTransfer');
+const closeProject = require('../controllers/manager/closeProject');
 const getRejectedTransfersController = require('../controllers/manager/getRejectedTransfersController');
 const getAllWorkOrders = require('../controllers/customer/getAllWorkOrders');
 const createWorkOrder = require('../controllers/customer/createWorkOrder');
@@ -180,6 +181,7 @@ router.post("/approve-order", authToken, approveWorkOrder);
 router.get("/get-bill-details/:id", authToken, getBillDetails);
 router.post("/accept-technician-project-transfer", authToken, acceptTechnicianProjectTransfer);
 router.post("/reject-technician-project-transfer", authToken, rejectTechnicianProjectTransfer);
+router.post("/close-project", authToken, closeProject);
 router.get("/get-returned-inventory", authToken, getReturnedInventory);
 router.post("/confirm-returned-inventory/:returnId", authToken, confirmReturnedInventory);
 router.post("/reject-returned-inventory/:returnId", authToken, rejectReturnedInventory);

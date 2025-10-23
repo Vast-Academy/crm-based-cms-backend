@@ -2,10 +2,10 @@ const BankAccount = require('../../models/bankAccountModel');
 
 async function getBankAccountsController(req, res) {
   try {
-    // Admin and Manager can access bank accounts (for payments)
-    if (req.userRole !== 'admin' && req.userRole !== 'manager') {
+    // Admin, Manager, and Technician can access bank accounts (for payments)
+    if (req.userRole !== 'admin' && req.userRole !== 'manager' && req.userRole !== 'technician') {
       return res.status(403).json({
-        message: 'Access denied. Admin or Manager role required.',
+        message: 'Access denied. Admin, Manager, or Technician role required.',
         error: true,
         success: false
       });
@@ -16,9 +16,9 @@ async function getBankAccountsController(req, res) {
     // If admin, get their own accounts
     if (req.userRole === 'admin') {
       query.adminId = req.userId;
-    } else if (req.userRole === 'manager') {
-      // If manager, get all admin accounts (for payment processing)
-      // Don't filter by adminId so manager can see all admin bank accounts
+    } else if (req.userRole === 'manager' || req.userRole === 'technician') {
+      // If manager or technician, get all admin accounts (for payment processing)
+      // Don't filter by adminId so they can see all admin bank accounts
       query = { status: 'active' };
     }
 

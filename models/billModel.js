@@ -95,11 +95,15 @@ const billSchema = new mongoose.Schema({
   // ✅ Payment & Timestamps
   paymentMethod: {
     type: String,
-    enum: ['cash', 'online', 'pending'],
+    enum: ['cash', 'upi', 'bank_transfer', 'cheque', 'online', 'pending'],
     default: 'pending'
   },
   transactionId: {
     type: String
+  },
+  paymentDetails: {
+    type: Object,
+    default: {}
   },
   paidAt: {
     type: Date

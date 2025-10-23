@@ -12,7 +12,7 @@ const confirmWorkOrderBill = async (req, res) => {
       });
     }
 
-    const { billId, paymentMethod, transactionId = null, paidAmount = null } = req.body;
+    const { billId, paymentMethod, transactionId = null, paidAmount = null, receivedAmount = null, paymentDetails = {} } = req.body;
 
     // Find the bill
     const bill = await BillModel.findById(billId);
@@ -35,30 +35,73 @@ const confirmWorkOrderBill = async (req, res) => {
     // Update the bill with payment details
     bill.paymentMethod = paymentMethod;
 
-    // Handle partial payment logic
-    if (paymentMethod === 'cash' && paidAmount !== null) {
-      bill.amountPaid = paidAmount;
-      bill.amountDue = bill.totalAmount - paidAmount;
+    // Store payment details for different methods
+    if (Object.keys(paymentDetails).length > 0) {
+      bill.paymentDetails = paymentDetails;
+    }
 
-      if (paidAmount === 0) {
+    // Determine the actual paid amount
+    const actualPaidAmount = receivedAmount || paidAmount || 0;
+
+    // Handle payment for all methods
+    if (paymentMethod === 'cash') {
+      bill.amountPaid = actualPaidAmount;
+      bill.amountDue = bill.totalAmount - actualPaidAmount;
+
+      if (actualPaidAmount === 0) {
         bill.extendedPaymentStatus = 'unpaid';
-      } else if (paidAmount > 0 && paidAmount < bill.totalAmount) {
+      } else if (actualPaidAmount > 0 && actualPaidAmount < bill.totalAmount) {
         bill.extendedPaymentStatus = 'partial';
-      } else if (paidAmount === bill.totalAmount) {
+      } else if (actualPaidAmount >= bill.totalAmount) {
         bill.extendedPaymentStatus = 'paid';
       }
 
-      // Bill status remains pending until manager approval, but do not override if rejected
       if (bill.status !== 'rejected') {
         bill.status = 'pending';
       }
-    } else if (paymentMethod === 'online') {
-      bill.transactionId = transactionId;
+    } else if (paymentMethod === 'upi') {
+      // UPI is always full payment
+      bill.transactionId = transactionId || paymentDetails.upiTransactionId;
       bill.paidAt = new Date();
       bill.amountPaid = bill.totalAmount;
       bill.amountDue = 0;
       bill.extendedPaymentStatus = 'paid';
-      // Assuming manager approval needed for online as well, but do not override if rejected
+
+      if (bill.status !== 'rejected') {
+        bill.status = 'pending';
+      }
+    } else if (paymentMethod === 'bank_transfer') {
+      // Bank Transfer can be partial
+      bill.transactionId = transactionId || paymentDetails.utrNumber;
+      bill.paidAt = new Date();
+      bill.amountPaid = actualPaidAmount;
+      bill.amountDue = bill.totalAmount - actualPaidAmount;
+
+      if (actualPaidAmount === 0) {
+        bill.extendedPaymentStatus = 'unpaid';
+      } else if (actualPaidAmount > 0 && actualPaidAmount < bill.totalAmount) {
+        bill.extendedPaymentStatus = 'partial';
+      } else if (actualPaidAmount >= bill.totalAmount) {
+        bill.extendedPaymentStatus = 'paid';
+      }
+
+      if (bill.status !== 'rejected') {
+        bill.status = 'pending';
+      }
+    } else if (paymentMethod === 'cheque') {
+      // Cheque can be partial
+      bill.paidAt = new Date();
+      bill.amountPaid = actualPaidAmount;
+      bill.amountDue = bill.totalAmount - actualPaidAmount;
+
+      if (actualPaidAmount === 0) {
+        bill.extendedPaymentStatus = 'unpaid';
+      } else if (actualPaidAmount > 0 && actualPaidAmount < bill.totalAmount) {
+        bill.extendedPaymentStatus = 'partial';
+      } else if (actualPaidAmount >= bill.totalAmount) {
+        bill.extendedPaymentStatus = 'paid';
+      }
+
       if (bill.status !== 'rejected') {
         bill.status = 'pending';
       }

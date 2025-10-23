@@ -1,5 +1,6 @@
 const Customer = require('../../models/customerModel');
 const generateOrderId = require('../../helpers/generateOrderId');
+// const { sendTemplate, toE164 } = require('../../helpers/whatsapp');
 
 const createCustomer = async (req, res) => {
   try {
@@ -89,6 +90,35 @@ const createCustomer = async (req, res) => {
     
     // Create new customer
     const customer = await Customer.create(customerData);
+
+     // === SEND WHATSAPP TEMPLATE (fire-and-forget) ===
+    // (async () => {
+    //   try {
+    //     const to = toE164(customer.phoneNumber);
+    //     if (!to) return;
+
+    //     const customerName =
+    //       customer.name ||
+    //       customer.fullName ||
+    //       req.body.name ||
+    //       req.body.customerName ||
+    //       'Customer';
+
+    //     await sendTemplate({
+    //       to,
+    //       name: 'customer_welcome',
+    //       params: [
+    //         customerName,                      // {{customer_name}}
+    //         process.env.BRAND_NAME || '3G Digital',     // {{brand_name}}
+    //         projectId,                         // {{project_id}}
+    //       ]
+    //     });
+    //   } catch (e) {
+    //     // WhatsApp fail hone par bhi customer creation success rahe
+    //     console.error('WhatsApp template send failed:', e.message, e.meta || '');
+    //   }
+    // })();
+    // ===============================================
    
     res.status(201).json({
       success: true,
