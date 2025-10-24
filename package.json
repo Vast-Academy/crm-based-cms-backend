@@ -16,6 +16,7 @@
   "dependencies": {
     "@octokit/auth-app": "^7.2.1",
     "@octokit/core": "^6.1.5",
+    "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
