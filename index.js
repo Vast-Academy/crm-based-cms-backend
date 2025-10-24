@@ -44,6 +44,7 @@ app.head('/ping', (req, res) => {
 });
 
 const PORT = process.env.PORT || 8080;
+const KEEP_ALIVE_URL = process.env.KEEP_ALIVE_URL;
 
 // 2️⃣ Cron Job: Har 5 minutes me `/ping` API call karega
 cron.schedule("*/5 * * * *", async () => {
