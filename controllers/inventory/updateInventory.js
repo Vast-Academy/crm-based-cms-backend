@@ -3,6 +3,14 @@ const Item = require('../../models/inventoryModel');
 // Check if your updateInventory controller is properly updating all fields
 const updateInventory = async (req, res) => {
   try {
+    // Admin can update all items, Manager can only update services
+    if (req.userRole !== 'admin' && req.userRole !== 'manager') {
+      return res.status(403).json({
+        success: false,
+        message: 'Permission denied. Only admin and manager can update items.'
+      });
+    }
+
     const {
       type,
       name,
@@ -25,6 +33,14 @@ const updateInventory = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Item not found'
+      });
+    }
+
+    // If manager, only allow service updates
+    if (req.userRole === 'manager' && item.type !== 'service') {
+      return res.status(403).json({
+        success: false,
+        message: 'Permission denied. Managers can only update services.'
       });
     }
 
