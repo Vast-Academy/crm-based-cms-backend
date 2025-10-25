@@ -22,7 +22,7 @@ const workOrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'assigned', 'in-progress', 'paused', 'pending-approval', 'completed', 'transferring', 'transferred', 'rejected', 'job-closed'],
+    enum: ['pending', 'assigned', 'in-progress', 'paused', 'pending-approval', 'completed', 'transferring', 'transferred', 'rejected', 'job-closed', 'cancelled'],
     default: 'pending'
   },
   initialRemark: {  // Add this field
@@ -31,7 +31,7 @@ const workOrderSchema = new mongoose.Schema({
   statusHistory: [{
     status: {
       type: String,
-      enum: ['assigned', 'in-progress', 'paused', 'pending-approval', 'completed', 'payment', 'approval', 'remark', 'communication', 'transferring', 'transferred', 'pending', 'rejected', 'job-closed'],
+      enum: ['assigned', 'in-progress', 'paused', 'pending-approval', 'completed', 'payment', 'approval', 'remark', 'communication', 'transferring', 'transferred', 'pending', 'rejected', 'job-closed', 'cancelled', 'instruction'],
       required: true
     },
     remark: {
@@ -144,6 +144,7 @@ const customerSchema = new mongoose.Schema({
         'Home/Office Automation',
         'IT & Networking Services',
         'Software & Website Development',
+        'Lift Access',
         'Custom'
       ],
       required: true

@@ -71,6 +71,8 @@ const getTransferHistory = require('../controllers/manager/getTransferHistory');
 const returnInventoryToManager = require('../controllers/technician/returnInventoryToManager');
 const getManagerProjects = require('../controllers/manager/getManagerProjects');
 const approveWorkOrder = require('../controllers/manager/approveWorkOrder');
+const cancelWorkOrder = require('../controllers/manager/cancelWorkOrder');
+const addManagerInstruction = require('../controllers/manager/addManagerInstruction');
 const getBillDetails = require('../controllers/manager/getBillDetails');
 const rejectBill = require('../controllers/manager/rejectBill');
 const getTechnicianProjects = require('../controllers/technician/getTechnicianProjects');
@@ -178,6 +180,8 @@ router.get("/get-rejected-transfers", authToken, getRejectedTransfersController)
 router.get("/get-transfer-history", authToken, getTransferHistory);
 router.get("/get-manager-projects", authToken, getManagerProjects);
 router.post("/approve-order", authToken, approveWorkOrder);
+router.post("/cancel-work-order", authToken, cancelWorkOrder);
+router.post("/add-manager-instruction", authToken, addManagerInstruction);
 router.get("/get-bill-details/:id", authToken, getBillDetails);
 router.post("/accept-technician-project-transfer", authToken, acceptTechnicianProjectTransfer);
 router.post("/reject-technician-project-transfer", authToken, rejectTechnicianProjectTransfer);
