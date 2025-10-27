@@ -1,4 +1,6 @@
 const Customer = require('../../models/customerModel');
+const User = require('../../models/userModel');
+const sendNotification = require('../../helpers/push/sendNotification');
 
 const assignTechnician = async (req, res) => {
     try {
@@ -39,6 +41,42 @@ const assignTechnician = async (req, res) => {
       
       await customer.save();
       console.log("customer data", customer);
+
+      try {
+        const technician = await User.findById(technicianId).select('firstName fcmTokens');
+        const tokens = technician?.fcmTokens?.map((entry) => entry.token).filter(Boolean) || [];
+
+        if (tokens.length) {
+          const customerName = (
+            customer.name ||
+            [customer.firstName, customer.lastName].filter(Boolean).join(' ')
+          ).trim();
+
+          const result = await sendNotification({
+            tokens,
+            notification: {
+              title: 'New Work Assignment',
+              body: `Order ${orderId} has been assigned to you.`,
+            },
+            data: {
+              type: 'WORK_ASSIGNED',
+              orderId: orderId.toString(),
+              customerId: customerId.toString(),
+              customerName,
+              url: '/technician-dashboard',
+            },
+          });
+
+          if (result.invalidTokens?.length) {
+            technician.fcmTokens = technician.fcmTokens.filter(
+              (entry) => !result.invalidTokens.includes(entry.token)
+            );
+            await technician.save();
+          }
+        }
+      } catch (notificationError) {
+        console.error('Failed to send technician notification:', notificationError);
+      }
       
       res.status(200).json({
         success: true,

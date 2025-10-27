@@ -8,6 +8,8 @@ const getManagersController = require('../controllers/admin/getManagersControlle
 const addManagerController = require('../controllers/admin/addManagerController');
 const getTechniciansController = require('../controllers/admin/getTechniciansController');
 const addTechnicianController = require('../controllers/admin/addTechnicianController');
+const registerNotificationToken = require('../controllers/notifications/registerToken');
+const removeNotificationToken = require('../controllers/notifications/removeToken');
 
 // Bank Account controllers
 const getBankAccountsController = require('../controllers/admin/getBankAccountsController');
@@ -148,6 +150,10 @@ router.post("/reset-system", authToken, resetSystem);
 // Profile Picture
 router.post("/upload-profile-picture", authToken, upload.single('profileImage'), handleUploadError, uploadProfilePictureController);
 router.delete("/delete-profile-picture", authToken, deleteProfilePictureController);
+
+// Notifications
+router.post("/notifications/token", authToken, registerNotificationToken);
+router.delete("/notifications/token", authToken, removeNotificationToken);
 
 // Admin
 router.get("/get-admins", authToken, getAdminUsersController);
