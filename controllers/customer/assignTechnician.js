@@ -60,10 +60,13 @@ const assignTechnician = async (req, res) => {
             },
             data: {
               type: 'WORK_ASSIGNED',
+              title: 'New Work Assignment',
+              body: `Order ${orderId} has been assigned to you.`,
               orderId: orderId.toString(),
               customerId: customerId.toString(),
               customerName,
               url: '/technician-dashboard',
+              icon: '/logo192.png',
             },
           });
 
