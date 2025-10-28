@@ -40,6 +40,7 @@ const stockAdd = require('../controllers/inventory/stockAdd');
 const updateInventory = require('../controllers/inventory/updateInventory');
 const deleteInventory = require('../controllers/inventory/deleteInventory');
 const checkSerialNumber = require('../controllers/inventory/checkSerialNumber');
+const getStockHistory = require('../controllers/inventory/getStockHistory');
 const exportInventory = require('../controllers/inventory/exportInventory');
 const importInventory = require('../controllers/inventory/importInventory');
 const getBranchTechniciansController = require('../controllers/manager/getBranchTechniciansController');
@@ -250,6 +251,7 @@ router.post("/update-inventory/:id", authToken, updateInventory);
 router.post("/delete-inventory/:id", authToken, deleteInventory);
 router.get("/check-serial/:serialNumber", authToken, checkSerialNumber);
 router.get("/inventory-by-type/:type", authToken, getInventoryByType);
+router.get("/stock-history/:itemId", authToken, getStockHistory);
 router.post("/assign-inventory-technician", authToken, assignInventoryToTechnician);
 router.get("/get-technician-inventory", authToken, getTechnicianInventory);
 

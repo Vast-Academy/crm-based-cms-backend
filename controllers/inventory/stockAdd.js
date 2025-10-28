@@ -1,4 +1,5 @@
 const Item = require('../../models/inventoryModel');
+const StockHistory = require('../../models/stockHistoryModel');
 
 const stockAdd = async (req, res) => {
   try {
@@ -62,6 +63,18 @@ const { itemId, serialNumber, quantity, date, remark } = req.body;
         branch: req.userBranch, // Add branch ID to stock entry
         remark: remark || ''
       });
+
+      // Create permanent history entry (log of stock addition)
+      await StockHistory.create({
+        item: item._id,
+        itemType: 'serialized-product',
+        serialNumber,
+        quantity: 1,
+        branch: req.userBranch,
+        addedDate: date || new Date(),
+        addedBy: req.userId,
+        remark: remark || ''
+      });
     } else if (item.type === 'generic-product') {
       // For non-serial products, add stock with quantity only
       if (!quantity || quantity <= 0) {
@@ -76,6 +89,17 @@ const { itemId, serialNumber, quantity, date, remark } = req.body;
         quantity,
         date: date || new Date(),
         branch: req.userBranch, // Add branch ID to stock entry
+        remark: remark || ''
+      });
+
+      // Create permanent history entry (log of stock addition)
+      await StockHistory.create({
+        item: item._id,
+        itemType: 'generic-product',
+        quantity,
+        branch: req.userBranch,
+        addedDate: date || new Date(),
+        addedBy: req.userId,
         remark: remark || ''
       });
     } else {
