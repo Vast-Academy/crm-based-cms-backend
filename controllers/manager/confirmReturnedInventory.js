@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const ReturnedInventory = require('../../models/returnedInventoryModel');
 const Item = require('../../models/inventoryModel');
 const TransferHistory = require('../../models/transferHistoryModel');
+const TechnicianInventory = require('../../models/technicianInventoryModel');
 
 const confirmReturnedInventory = async (req, res) => {
   try {
@@ -66,6 +67,23 @@ const confirmReturnedInventory = async (req, res) => {
         }
         
         await item.save({ session });
+
+        // Remove the serialized entry from the technician's inventory now that it is back in branch stock
+        if (returnedItem.type === 'serialized-product') {
+          const techInventory = await TechnicianInventory.findOne({
+            technician: returnEntry.technician,
+            item: item._id
+          }).session(session);
+
+          if (techInventory) {
+            techInventory.serializedItems = techInventory.serializedItems.filter(
+              serialItem => serialItem.serialNumber !== returnedItem.serialNumber
+            );
+            techInventory.lastUpdated = new Date();
+            techInventory.lastUpdatedBy = req.userId;
+            await techInventory.save({ session });
+          }
+        }
         
         // Create transfer history record
         await new TransferHistory({
