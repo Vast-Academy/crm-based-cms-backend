@@ -71,8 +71,8 @@ const returnInventoryToManager = async (req, res) => {
       
       // Update item status to "returned"
       techInventory.serializedItems[serialItemIndex].status = 'returned';
-      
-      // Create or update returned inventory entry
+
+      // Create new returned inventory entry
       await createOrUpdateReturnedInventory(req.userId, req.userBranch, item._id, serialNumber, 1, type);
       
     } else {
@@ -88,8 +88,8 @@ const returnInventoryToManager = async (req, res) => {
       
       // Reduce from technician's inventory
       techInventory.genericQuantity -= quantity;
-      
-      // Create or update returned inventory entry
+
+      // Create new returned inventory entry
       await createOrUpdateReturnedInventory(req.userId, req.userBranch, item._id, null, quantity, type);
     }
     
@@ -119,48 +119,28 @@ const returnInventoryToManager = async (req, res) => {
   }
 };
 
-// Helper function to create or update a returned inventory entry
+// Helper function to create a new returned inventory entry
 const createOrUpdateReturnedInventory = async (technicianId, branchId, itemId, serialNumber, quantity, type) => {
   try {
-    // Look for an existing pending return from this technician
-    let returnEntry = await ReturnedInventory.findOne({
+    // Always create a new return entry for each return request
+    // This ensures each return action creates a separate entry with its own timestamp
+    const returnEntry = new ReturnedInventory({
       technician: technicianId,
       branch: branchId,
-      status: 'pending'
-    });
-    
-    if (!returnEntry) {
-      // Create a new return entry if none exists
-      returnEntry = new ReturnedInventory({
-        technician: technicianId,
-        branch: branchId,
-        items: []
-      });
-    }
-    
-    // Check if this item is already in the return list
-    const existingItemIndex = returnEntry.items.findIndex(
-      item => item.item.toString() === itemId.toString() && 
-        (type === 'generic-product' || item.serialNumber === serialNumber)
-    );
-    
-    if (existingItemIndex >= 0 && type === 'generic-product') {
-      // For generic items, update the quantity
-      returnEntry.items[existingItemIndex].quantity += quantity;
-    } else {
-      // Add new item to return
-      returnEntry.items.push({
+      items: [{
         item: itemId,
         quantity,
         serialNumber,
         type
-      });
-    }
-    
+      }],
+      returnedAt: new Date() // Explicitly set the return timestamp
+    });
+
     await returnEntry.save();
+    console.log('New return entry created:', returnEntry._id);
     return returnEntry;
   } catch (err) {
-    console.error('Error creating/updating returned inventory:', err);
+    console.error('Error creating returned inventory:', err);
     throw err;
   }
 };
