@@ -48,6 +48,7 @@ const convertToCustomer = async (req, res) => {
       name: lead.name,
       phoneNumber: lead.phoneNumber,
       email: lead.email,
+      firmName: lead.firmName,
       whatsappNumber: lead.whatsappNumber,
       address: lead.address,
       age: lead.age,

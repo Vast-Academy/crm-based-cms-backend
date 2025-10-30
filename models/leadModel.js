@@ -53,6 +53,7 @@ const leadSchema = new mongoose.Schema({
       'CCTV Camera',
       'Attendance System',
       'Safe and Locks',
+      'Lift & Elevator Solutions',
       'Home/Office Automation',
       'IT & Networking Services',
       'Software & Website Development',
