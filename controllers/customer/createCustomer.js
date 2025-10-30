@@ -4,10 +4,10 @@ const generateOrderId = require('../../helpers/generateOrderId');
 
 const createCustomer = async (req, res) => {
   try {
-    const { projectType, initialRemark, isExistingCustomer, completionDate, installedBy } = req.body;
-   
-    // Check if project type is provided
-    if (!projectType) {
+    const { projectType, initialRemark, isExistingCustomer, completionDate, installedBy, customerStatus } = req.body;
+
+    // Check if project type is provided (not required for Billing customers)
+    if (!projectType && customerStatus !== 'Billing') {
       return res.status(400).json({
         success: false,
         message: 'Project type is required'
@@ -31,15 +31,11 @@ const createCustomer = async (req, res) => {
     if (req.user.role !== 'admin') {
       branch = req.user.branch;
     }
-   
-    // Generate project ID
-    const projectId = `PRJ-${Date.now().toString().slice(-6)}`;
-    
+
     // Prepare customer data
     const customerData = {
       ...req.body,
       branch,
-      projectType: projectType,
       createdBy: req.user.id,
       updatedBy: req.user.id
     };
@@ -48,6 +44,24 @@ const createCustomer = async (req, res) => {
     if (req.body.customerStatus) {
       customerData.customerStatus = req.body.customerStatus;
     }
+
+    // Handle Billing customers (no projects, no work orders)
+    if (customerStatus === 'Billing') {
+      customerData.projects = [];
+      customerData.workOrders = [];
+
+      // Create billing customer
+      const customer = await Customer.create(customerData);
+
+      return res.status(201).json({
+        success: true,
+        data: customer
+      });
+    }
+
+    // Generate project ID for non-billing customers
+    const projectId = `PRJ-${Date.now().toString().slice(-6)}`;
+    customerData.projectType = projectType;
 
     if (isExistingCustomer) {
       // For existing customers, create completed project without work order

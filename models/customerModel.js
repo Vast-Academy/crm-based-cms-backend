@@ -192,7 +192,7 @@ const customerSchema = new mongoose.Schema({
   },
   customerStatus: {
     type: String,
-    enum: ['New', 'Existing'],
+    enum: ['New', 'Existing', 'Billing'],
     default: 'New'
   },
   createdBy: {
