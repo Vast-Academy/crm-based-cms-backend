@@ -95,7 +95,7 @@ const billSchema = new mongoose.Schema({
   // ✅ Payment & Timestamps
   paymentMethod: {
     type: String,
-    enum: ['cash', 'upi', 'bank_transfer', 'cheque', 'online', 'pending'],
+    enum: ['cash', 'upi', 'bank_transfer', 'cheque', 'online', 'pending', 'no_payment'],
     default: 'pending'
   },
   transactionId: {
@@ -111,6 +111,11 @@ const billSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  // Store inventory update information for processing during payment confirmation
+  itemsToUpdate: {
+    type: Array,
+    default: []
   }
 }, { timestamps: true });
 

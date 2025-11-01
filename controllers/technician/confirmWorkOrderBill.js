@@ -105,68 +105,76 @@ const confirmWorkOrderBill = async (req, res) => {
       if (bill.status !== 'rejected') {
         bill.status = 'pending';
       }
+    } else if (paymentMethod === 'no_payment') {
+      // No payment - Bill created without collecting payment
+      bill.amountPaid = 0;
+      bill.amountDue = bill.totalAmount;
+      bill.extendedPaymentStatus = 'unpaid';
+
+      if (bill.status !== 'rejected') {
+        bill.status = 'pending';
+      }
     }
 
     await bill.save();
 
-    // Only update inventory if some payment was made (paidAmount > 0)
-    if (bill.amountPaid > 0) {
-      // If we have itemsToUpdate stored in the bill from createWorkOrderBill
-      if (bill.itemsToUpdate && bill.itemsToUpdate.length > 0) {
-        for (const updateItem of bill.itemsToUpdate) {
-          const inventory = await TechnicianInventory.findById(updateItem.inventoryId);
+    // Always update inventory when bill is confirmed, regardless of payment amount
+    // Items have been used/delivered even if payment is 0 (credit/later payment)
+    // If we have itemsToUpdate stored in the bill from createWorkOrderBill
+    if (bill.itemsToUpdate && bill.itemsToUpdate.length > 0) {
+      for (const updateItem of bill.itemsToUpdate) {
+        const inventory = await TechnicianInventory.findById(updateItem.inventoryId);
 
-          if (inventory) {
-            if (updateItem.type === 'serialized') {
-              // Update serial item status to 'used'
-              const serialIndex = inventory.serializedItems.findIndex(
-                serial => serial.serialNumber === updateItem.serialNumber
-              );
+        if (inventory) {
+          if (updateItem.type === 'serialized') {
+            // Update serial item status to 'used'
+            const serialIndex = inventory.serializedItems.findIndex(
+              serial => serial.serialNumber === updateItem.serialNumber
+            );
 
-              if (serialIndex >= 0) {
-                inventory.serializedItems[serialIndex].status = 'used';
-              }
-            } else {
-              // Reduce generic quantity by the specified amount
-              inventory.genericQuantity -= updateItem.quantity;
-              if (inventory.genericQuantity < 0) inventory.genericQuantity = 0;
+            if (serialIndex >= 0) {
+              inventory.serializedItems[serialIndex].status = 'used';
             }
-
-            inventory.lastUpdated = new Date();
-            inventory.lastUpdatedBy = req.user._id;
-
-            await inventory.save();
+          } else {
+            // Reduce generic quantity by the specified amount
+            inventory.genericQuantity -= updateItem.quantity;
+            if (inventory.genericQuantity < 0) inventory.genericQuantity = 0;
           }
+
+          inventory.lastUpdated = new Date();
+          inventory.lastUpdatedBy = req.user._id;
+
+          await inventory.save();
         }
-      } else {
-        // Fallback to using the bill items directly if itemsToUpdate is not available
-        for (const item of bill.items) {
-          const inventory = await TechnicianInventory.findOne({
-            technician: req.user._id,
-            item: item.itemId
-          });
+      }
+    } else {
+      // Fallback to using the bill items directly if itemsToUpdate is not available
+      for (const item of bill.items) {
+        const inventory = await TechnicianInventory.findOne({
+          technician: req.user._id,
+          item: item.itemId
+        });
 
-          if (inventory) {
-            if (item.type === 'serialized-product' && item.serialNumber) {
-              // For serialized items, mark as used
-              const serialIndex = inventory.serializedItems.findIndex(
-                serial => serial.serialNumber === item.serialNumber
-              );
+        if (inventory) {
+          if (item.type === 'serialized-product' && item.serialNumber) {
+            // For serialized items, mark as used
+            const serialIndex = inventory.serializedItems.findIndex(
+              serial => serial.serialNumber === item.serialNumber
+            );
 
-              if (serialIndex >= 0) {
-                inventory.serializedItems[serialIndex].status = 'used';
-              }
-            } else if (item.type === 'generic-product') {
-              // For generic items, reduce quantity by the amount in the bill
-              inventory.genericQuantity -= item.quantity;
-              if (inventory.genericQuantity < 0) inventory.genericQuantity = 0;
+            if (serialIndex >= 0) {
+              inventory.serializedItems[serialIndex].status = 'used';
             }
-
-            inventory.lastUpdated = new Date();
-            inventory.lastUpdatedBy = req.user._id;
-
-            await inventory.save();
+          } else if (item.type === 'generic-product') {
+            // For generic items, reduce quantity by the amount in the bill
+            inventory.genericQuantity -= item.quantity;
+            if (inventory.genericQuantity < 0) inventory.genericQuantity = 0;
           }
+
+          inventory.lastUpdated = new Date();
+          inventory.lastUpdatedBy = req.user._id;
+
+          await inventory.save();
         }
       }
     }
@@ -197,9 +205,17 @@ const confirmWorkOrderBill = async (req, res) => {
           workOrder.statusHistory = [];
         }
 
+        // Create appropriate remark based on payment method
+        let paymentRemark;
+        if (paymentMethod === 'no_payment') {
+          paymentRemark = `Bill created without payment - Full amount of ₹${bill.totalAmount.toFixed(2)} marked as due`;
+        } else {
+          paymentRemark = `Payment of ₹${bill.totalAmount.toFixed(2)} received via ${paymentMethod}`;
+        }
+
         workOrder.statusHistory.push({
           status: 'payment',
-          remark: `Payment of ₹${bill.totalAmount.toFixed(2)} received via ${paymentMethod}`,
+          remark: paymentRemark,
           updatedAt: new Date(),
           updatedBy: req.user._id
         });
