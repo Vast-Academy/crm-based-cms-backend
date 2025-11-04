@@ -160,6 +160,12 @@ const customerSchema = new mongoose.Schema({
       type: String,
       enum: ['Our Company', 'Others']
     },
+    installedByEngineer: {
+      type: String
+    },
+    engineerMobileNo: {
+      type: String
+    },
     completionDate: {
       type: Date
     },

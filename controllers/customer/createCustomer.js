@@ -4,7 +4,7 @@ const generateOrderId = require('../../helpers/generateOrderId');
 
 const createCustomer = async (req, res) => {
   try {
-    const { projectType, initialRemark, isExistingCustomer, completionDate, installedBy, customerStatus } = req.body;
+    const { projectType, initialRemark, isExistingCustomer, completionDate, installedBy, installedByEngineer, engineerMobileNo, customerStatus } = req.body;
 
     // Check if project type is provided (not required for Billing customers)
     if (!projectType && customerStatus !== 'Billing') {
@@ -75,6 +75,8 @@ const createCustomer = async (req, res) => {
         projectCategory: 'New Installation',
         initialRemark,
         installedBy,
+        installedByEngineer: installedByEngineer || '',
+        engineerMobileNo: engineerMobileNo || '',
         completionDate: installationDate,
         status: 'completed',
         createdAt: projectCreationDate
