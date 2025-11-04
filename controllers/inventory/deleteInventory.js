@@ -2,11 +2,11 @@ const Item = require('../../models/inventoryModel');
 
 const deleteInventory =  async (req, res) => {
     try {
-      // Admin can delete all items, Manager can only delete services
-      if (req.userRole !== 'admin' && req.userRole !== 'manager') {
+      // Admin can delete all items, Manager and Technician can only delete services
+      if (req.userRole !== 'admin' && req.userRole !== 'manager' && req.userRole !== 'technician') {
         return res.status(403).json({
           success: false,
-          message: 'Permission denied. Only admin and manager can delete items.'
+          message: 'Permission denied. Only admin, manager, and technician can delete items.'
         });
       }
 
@@ -20,11 +20,11 @@ const deleteInventory =  async (req, res) => {
         });
       }
 
-      // If manager, only allow service deletion
-      if (req.userRole === 'manager' && item.type !== 'service') {
+      // If manager or technician, only allow service deletion
+      if ((req.userRole === 'manager' || req.userRole === 'technician') && item.type !== 'service') {
         return res.status(403).json({
           success: false,
-          message: 'Permission denied. Managers can only delete services.'
+          message: 'Permission denied. Managers and technicians can only delete services.'
         });
       }
 

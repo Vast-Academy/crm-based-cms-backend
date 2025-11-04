@@ -1,19 +1,19 @@
 const Item = require('../../models/inventoryModel');
 const createInventory = async (req, res) => {
   try {
-    // Admin can create all items, Manager can only create services
-    if (req.userRole !== 'admin' && req.userRole !== 'manager') {
+    // Admin can create all items, Manager and Technician can only create services
+    if (req.userRole !== 'admin' && req.userRole !== 'manager' && req.userRole !== 'technician') {
       return res.status(403).json({
         success: false,
-        message: 'Permission denied. Only admin and manager can add items.'
+        message: 'Permission denied. Only admin, manager, and technician can add items.'
       });
     }
 
-    // If manager, only allow service creation
-    if (req.userRole === 'manager' && req.body.type !== 'service') {
+    // If manager or technician, only allow service creation
+    if ((req.userRole === 'manager' || req.userRole === 'technician') && req.body.type !== 'service') {
       return res.status(403).json({
         success: false,
-        message: 'Permission denied. Managers can only add services.'
+        message: 'Permission denied. Managers and technicians can only add services.'
       });
     }
     
