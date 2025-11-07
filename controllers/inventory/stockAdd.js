@@ -1,5 +1,12 @@
 const Item = require('../../models/inventoryModel');
 const StockHistory = require('../../models/stockHistoryModel');
+const TechnicianInventory = require('../../models/technicianInventoryModel');
+const Bill = require('../../models/billModel');
+const SalesBill = require('../../models/salesBillModel');
+const User = require('../../models/userModel');
+const Customer = require('../../models/customerModel');
+const Dealer = require('../../models/dealerModel');
+const Distributor = require('../../models/distributorModel');
 
 const stockAdd = async (req, res) => {
   try {
@@ -12,7 +19,7 @@ const stockAdd = async (req, res) => {
     }
 
 const { itemId, serialNumber, quantity, date, remark } = req.body;
-   
+
     // Check if manager has a branch assigned
     if (!req.userBranch) {
       return res.status(400).json({
@@ -29,7 +36,7 @@ const { itemId, serialNumber, quantity, date, remark } = req.body;
         message: 'Item not found'
       });
     }
-   
+
     // Validate item type vs stock data
     if (item.type === 'serialized-product') {
       // For serial products, check if serial number already exists
@@ -39,11 +46,12 @@ const { itemId, serialNumber, quantity, date, remark } = req.body;
           message: 'Serial number is required for serialized products'
         });
       }
-     
+
+      // Check if serial number already exists in inventory stock
       const existingSerialNumber = await Item.findOne({
         'stock.serialNumber': serialNumber
       });
-     
+
       if (existingSerialNumber) {
         return res.status(400).json({
           success: false,
@@ -51,6 +59,66 @@ const { itemId, serialNumber, quantity, date, remark } = req.body;
           existingItem: {
             id: existingSerialNumber.id,
             name: existingSerialNumber.name
+          }
+        });
+      }
+
+      // Check if serial number is assigned to any technician
+      const technicianAssignment = await TechnicianInventory.findOne({
+        'serializedItems.serialNumber': serialNumber,
+        'serializedItems.status': 'active'
+      }).populate('technician', 'firstName lastName username');
+
+      if (technicianAssignment) {
+        const techName = technicianAssignment.technician
+          ? `${technicianAssignment.technician.firstName} ${technicianAssignment.technician.lastName}`
+          : 'Unknown Technician';
+
+        return res.status(400).json({
+          success: false,
+          message: `Serial number is currently assigned to technician: ${techName}`,
+          assignedTo: {
+            technicianName: techName,
+            username: technicianAssignment.technician?.username
+          }
+        });
+      }
+
+      // Check if serial number is used in any work order bill (customer bills)
+      const usedInBill = await Bill.findOne({
+        'items.serialNumber': serialNumber,
+        status: { $ne: 'rejected' } // Exclude rejected bills
+      }).populate('customer', 'name');
+
+      if (usedInBill) {
+        const customerName = usedInBill.customer?.name || 'Unknown Customer';
+
+        return res.status(400).json({
+          success: false,
+          message: `Serial number has already been used in a bill for customer: ${customerName}`,
+          usedBy: {
+            customerName: customerName,
+            billNumber: usedInBill.billNumber
+          }
+        });
+      }
+
+      // Check if serial number is used in any sales bill (dealer/distributor bills)
+      const usedInSalesBill = await SalesBill.findOne({
+        'items.serialNumber': serialNumber
+      });
+
+      if (usedInSalesBill) {
+        let entityName = usedInSalesBill.customerName || 'Unknown';
+        const entityType = usedInSalesBill.customerType || 'entity';
+
+        return res.status(400).json({
+          success: false,
+          message: `Serial number has already been used in a bill for ${entityType}: ${entityName}`,
+          usedBy: {
+            entityName: entityName,
+            entityType: entityType,
+            billNumber: usedInSalesBill.billNumber
           }
         });
       }
