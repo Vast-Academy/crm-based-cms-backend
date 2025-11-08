@@ -53,6 +53,9 @@ const salesBillSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  customerFirmName: {
+    type: String
+  },
   customerPhone: {
     type: String,
     required: true

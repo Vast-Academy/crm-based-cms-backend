@@ -13,19 +13,19 @@ const createCustomer = async (req, res) => {
         message: 'Project type is required'
       });
     }
-   
-    // Check if phone number already exists
-    const existingCustomer = await Customer.findOne({
-      phoneNumber: req.body.phoneNumber
-    });
-   
-    if (existingCustomer) {
-      return res.status(400).json({
-        success: false,
-        message: 'A customer with this phone number already exists'
-      });
-    }
-   
+
+    // Phone number uniqueness validation removed - Multiple customers can have same phone number
+    // const existingCustomer = await Customer.findOne({
+    //   phoneNumber: req.body.phoneNumber
+    // });
+
+    // if (existingCustomer) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'A customer with this phone number already exists'
+    //   });
+    // }
+
     // Set branch based on user role
     let branch = req.body.branch;
     if (req.user.role !== 'admin') {

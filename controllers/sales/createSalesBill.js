@@ -273,6 +273,7 @@ async function createSalesBill(req, res) {
       customerId,
       customerModel,
       customerName: customer.name,
+      customerFirmName: customer.firmName || '',
       customerPhone: customer.phoneNumber,
       items: processedItems,
       subtotal,

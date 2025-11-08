@@ -127,6 +127,17 @@ const customerSchema = new mongoose.Schema({
   address: {
     type: String
   },
+  // Contact Person Details
+  contactPersonName: {
+    type: String
+  },
+  contactPersonPhone: {
+    type: String
+  },
+  showOwnerDetailsToTechnician: {
+    type: Boolean,
+    default: false
+  },
   // age: {
   //   type: Number
   // },
