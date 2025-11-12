@@ -101,6 +101,11 @@ async function createSalesBill(req, res) {
       });
     }
 
+    // Determine which branch to use (admin uses dealer/distributor's branch, manager uses their own)
+    const branchToUse = req.user && req.user.role === 'admin'
+      ? customer.branch
+      : req.user.branch;
+
     // Process and validate items
     const processedItems = [];
     let subtotal = 0;
@@ -155,21 +160,21 @@ async function createSalesBill(req, res) {
           });
         }
 
-        // Check if serial number exists in current manager's branch stock
-        const stockItem = item.stock.find(s => 
-          s.serialNumber === serialNumber && 
-          s.branch.toString() === req.user.branch.toString()
+        // Check if serial number exists in current branch stock
+        const stockItem = item.stock.find(s =>
+          s.serialNumber === serialNumber &&
+          s.branch.toString() === branchToUse.toString()
         );
         if (!stockItem) {
           return res.status(400).json({
             success: false,
-            message: `Serial number ${serialNumber} not available in your branch for item: ${item.name}`
+            message: `Serial number ${serialNumber} not available in this branch for item: ${item.name}`
           });
         }
       } else if (item.type === 'generic-product') {
-        // For generic products, check if enough quantity is available in manager's branch
-        const branchStock = item.stock.filter(s => 
-          s.branch.toString() === req.user.branch.toString()
+        // For generic products, check if enough quantity is available in the branch
+        const branchStock = item.stock.filter(s =>
+          s.branch.toString() === branchToUse.toString()
         );
         const availableQty = branchStock.reduce((total, stock) => total + stock.quantity, 0);
         
@@ -286,8 +291,10 @@ async function createSalesBill(req, res) {
       transactionId: transactionId || null,
       paymentDetails: validatedPaymentDetails,
       notes: notes || '',
-      branch: req.user.branch || customer.branch,
-      createdBy: req.userId
+      branch: branchToUse,
+      createdBy: req.userId,
+      createdByRole: req.user ? req.user.role : null,
+      createdByName: req.user ? `${req.user.firstName} ${req.user.lastName}` : null
     };
 
     // Generate QR code data for UPI payments
@@ -300,7 +307,7 @@ async function createSalesBill(req, res) {
     const savedBill = await salesBill.save();
 
     // Update inventory stock after successful bill creation
-    await updateInventoryStock(processedItems, req.user.branch);
+    await updateInventoryStock(processedItems, branchToUse);
 
     // Create transaction record if payment was made during bill creation
     if (paidAmountValue > 0) {
@@ -319,7 +326,7 @@ async function createSalesBill(req, res) {
             allocatedAmount: paidAmountValue
           }],
           notes: notes || `Payment made during bill creation`,
-          branch: req.user.branch || customer.branch,
+          branch: branchToUse,
           createdBy: req.userId,
           transactionType: 'payment_received' // This is bill creation payment
         });

@@ -50,6 +50,8 @@ const importInventory = require('../controllers/inventory/importInventory');
 const getBranchTechniciansController = require('../controllers/manager/getBranchTechniciansController');
 const managerAddTechnicianController = require('../controllers/manager/managerAddTechnicianController');
 const getFinancialSummary = require('../controllers/manager/getFinancialSummary');
+const getAdminFinancialSummary = require('../controllers/admin/getAdminFinancialSummary');
+const getBranchBalanceOverview = require('../controllers/admin/getBranchBalanceOverview');
 const getBalanceOverview = require('../controllers/manager/getBalanceOverview');
 const getUserController = require('../controllers/user/getUserController');
 const updateUserController = require('../controllers/user/updateUserController');
@@ -185,6 +187,8 @@ router.delete("/delete-bank-account/:accountId", authToken, deleteBankAccountCon
 router.get("/manager-get-technician", authToken, getBranchTechniciansController);
 router.post("/manager-add-technician", authToken, managerAddTechnicianController);
 router.get("/manager/financial-summary", authToken, getFinancialSummary);
+router.get("/admin/financial-summary", authToken, getAdminFinancialSummary);
+router.get("/admin/branch-balance-overview", authToken, getBranchBalanceOverview);
 router.get("/manager/balance-overview", authToken, getBalanceOverview);
 router.get("/new-managers", authToken, getNewBranchManagersController);
 router.get("/manager-status", authToken, checkManagerStatusController);

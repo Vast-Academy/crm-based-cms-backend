@@ -36,6 +36,7 @@ const getAllWorkOrders = async (req, res) => {
             customerEmail: customer.email,
             customerAddress: customer.address || '',
             customerFirmName: customer.firmName || '',
+            branchId: customer.branch ? (customer.branch._id || customer.branch) : null,
             branchName: customer.branch ? customer.branch.name : null,
             customerId: customer._id,
             initialRemark: order.initialRemark,

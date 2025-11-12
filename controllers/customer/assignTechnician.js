@@ -35,6 +35,8 @@ const assignTechnician = async (req, res) => {
       // Update work order
       workOrder.technician = technicianId;
       workOrder.assignedBy = req.user.id;
+      workOrder.assignedByRole = req.user.role;
+      workOrder.assignedByName = `${req.user.firstName} ${req.user.lastName}`;
       workOrder.assignedAt = new Date();
       workOrder.status = 'assigned';
       workOrder.instructions = instructions;

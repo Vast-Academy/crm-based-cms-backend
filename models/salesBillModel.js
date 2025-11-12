@@ -136,6 +136,13 @@ const salesBillSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  createdByRole: {
+    type: String,
+    enum: ['admin', 'manager']
+  },
+  createdByName: {
+    type: String
+  },
   updatedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

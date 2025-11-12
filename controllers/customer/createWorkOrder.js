@@ -18,7 +18,7 @@ const createWorkOrder = async (req, res) => {
       });
     }
    
-    // Check if user has permission
+    // Check if user has permission (admin can access all, manager only their branch)
     if (req.user.role !== 'admin' && customer.branch.toString() !== req.user.branch.toString()) {
       return res.status(403).json({
         success: false,
@@ -77,6 +77,9 @@ console.log('Setting project category to:', finalProjectCategory);
         projectType: finalProjectType,
         projectCategory: finalProjectCategory,
         initialRemark,
+        createdBy: req.userId,
+        createdByRole: req.user.role,
+        createdByName: `${req.user.firstName} ${req.user.lastName}`,
         createdAt: new Date()
       };
       
@@ -100,6 +103,9 @@ console.log('Input data:', {
       projectCategory: finalProjectCategory,
       status: 'pending',
       initialRemark,
+      createdBy: req.userId,
+      createdByRole: req.user.role,
+      createdByName: `${req.user.firstName} ${req.user.lastName}`,
       createdAt: new Date()
     };
     console.log('Work order being created:', workOrder);

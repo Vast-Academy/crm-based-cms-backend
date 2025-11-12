@@ -28,6 +28,18 @@ const workOrderSchema = new mongoose.Schema({
   initialRemark: {  // Add this field
     type: String
   },
+  // Track who created this work order (manager or admin)
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  createdByRole: {
+    type: String,
+    enum: ['admin', 'manager']
+  },
+  createdByName: {
+    type: String
+  },
   statusHistory: [{
     status: {
       type: String,
@@ -89,6 +101,13 @@ const workOrderSchema = new mongoose.Schema({
   assignedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  assignedByRole: {
+    type: String,
+    enum: ['admin', 'manager']
+  },
+  assignedByName: {
+    type: String
   },
   assignedAt: {
     type: Date
@@ -179,6 +198,18 @@ const customerSchema = new mongoose.Schema({
     },
     completionDate: {
       type: Date
+    },
+    // Track who created this project (manager or admin)
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    createdByRole: {
+      type: String,
+      enum: ['admin', 'manager']
+    },
+    createdByName: {
+      type: String
     },
     status: {
       type: String,

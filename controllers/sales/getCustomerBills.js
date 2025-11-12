@@ -48,6 +48,8 @@ async function getCustomerBills(req, res) {
       paymentDetails: bill.paymentDetails,
       createdAt: bill.createdAt,
       createdBy: bill.createdBy,
+      createdByRole: bill.createdByRole,
+      createdByName: bill.createdByName,
       branch: bill.branch,
       billSource: 'manager', // Identifier for source
       modelType: 'SalesBill' // Model identifier for payment processing
@@ -77,6 +79,8 @@ async function getCustomerBills(req, res) {
       paymentDetails: bill.paymentDetails,
       createdAt: bill.createdAt,
       createdBy: bill.technician,
+      createdByRole: bill.createdByRole,
+      createdByName: bill.createdByName,
       branch: null, // Technician bills may not have branch info
       billSource: 'technician', // Identifier for source
       modelType: 'TechnicianBill', // Model identifier for payment processing

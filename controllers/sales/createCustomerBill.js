@@ -73,6 +73,21 @@ async function createCustomerBill(req, res) {
       });
     }
 
+    // Check if user has permission (admin can access all, manager only their branch)
+    if (req.user && req.user.role !== 'admin' && req.userBranch) {
+      if (customer.branch.toString() !== req.userBranch.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to create bill for this customer'
+        });
+      }
+    }
+
+    // Determine which branch to use (admin uses customer's branch, manager uses their own)
+    const branchToUse = req.user && req.user.role === 'admin'
+      ? customer.branch
+      : req.userBranch;
+
     // Process items and calculate pricing
     const billItems = [];
     let subtotal = 0;
@@ -96,14 +111,14 @@ async function createCustomerBill(req, res) {
         });
       }
 
-      // Check if item belongs to manager's branch
-      if (req.userBranch && item.branch && 
-          !item.stock.some(stockItem => 
-            stockItem.branch && stockItem.branch.toString() === req.userBranch.toString()
+      // Check if item belongs to the branch
+      if (branchToUse && item.branch &&
+          !item.stock.some(stockItem =>
+            stockItem.branch && stockItem.branch.toString() === branchToUse.toString()
           )) {
         return res.status(400).json({
           success: false,
-          message: `Item ${item.name} is not available in your branch`
+          message: `Item ${item.name} is not available in this branch`
         });
       }
 
@@ -122,24 +137,24 @@ async function createCustomerBill(req, res) {
             });
           }
 
-          // Check if serial number exists in current manager's branch stock
-          const stockItem = item.stock.find(s => 
-            s.serialNumber === serialNumber && 
-            s.branch.toString() === req.userBranch.toString()
+          // Check if serial number exists in current branch stock
+          const stockItem = item.stock.find(s =>
+            s.serialNumber === serialNumber &&
+            s.branch.toString() === branchToUse.toString()
           );
           if (!stockItem) {
             return res.status(400).json({
               success: false,
-              message: `Serial number ${serialNumber} not available in your branch for item: ${item.name}`
+              message: `Serial number ${serialNumber} not available in this branch for item: ${item.name}`
             });
           }
         } else if (item.type === 'generic-product') {
-          // For generic products, check if enough quantity is available in manager's branch
-          const branchStock = item.stock.filter(s => 
-            s.branch.toString() === req.userBranch.toString()
+          // For generic products, check if enough quantity is available in the branch
+          const branchStock = item.stock.filter(s =>
+            s.branch.toString() === branchToUse.toString()
           );
           const availableQty = branchStock.reduce((total, stock) => total + stock.quantity, 0);
-          
+
           if (availableQty < quantity) {
             return res.status(400).json({
               success: false,
@@ -196,14 +211,16 @@ async function createCustomerBill(req, res) {
       transactionId: transactionId || null,
       paymentDetails: paymentDetails || undefined,
       notes: notes || '',
-      branch: req.userBranch,
-      createdBy: req.userId
+      branch: branchToUse,
+      createdBy: req.userId,
+      createdByRole: req.user ? req.user.role : null,
+      createdByName: req.user ? `${req.user.firstName} ${req.user.lastName}` : null
     });
 
     await bill.save();
 
     // Update inventory stock after successful bill creation
-    await updateInventoryStock(billItems, req.userBranch);
+    await updateInventoryStock(billItems, branchToUse);
 
     // Create transaction record if payment was made during bill creation
     if (bill.paidAmount > 0) {
@@ -222,7 +239,7 @@ async function createCustomerBill(req, res) {
             allocatedAmount: bill.paidAmount
           }],
           notes: bill.notes || `Payment made during bill creation`,
-          branch: req.userBranch,
+          branch: branchToUse,
           createdBy: req.userId,
           transactionType: 'payment_received' // This is bill creation payment
         });

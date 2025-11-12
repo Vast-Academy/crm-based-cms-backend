@@ -25,7 +25,7 @@ const addComplaint = async (req, res) => {
       });
     }
 
-    // Check if user has permission
+    // Check if user has permission (admin can access all, manager only their branch)
     if (req.user.role !== 'admin' && customer.branch.toString() !== req.user.branch.toString()) {
       return res.status(403).json({
         success: false,
@@ -75,6 +75,9 @@ const addComplaint = async (req, res) => {
       projectCategory: 'Repair',
       status: 'pending',
       initialRemark: complaintRemark,
+      createdBy: req.userId,
+      createdByRole: req.user.role,
+      createdByName: `${req.user.firstName} ${req.user.lastName}`,
       createdAt: new Date(),
       updatedAt: new Date()
     };

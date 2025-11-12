@@ -112,6 +112,18 @@ const billSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  // Track who created this bill (admin or manager)
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  createdByRole: {
+    type: String,
+    enum: ['admin', 'manager']
+  },
+  createdByName: {
+    type: String
+  },
   // Store inventory update information for processing during payment confirmation
   itemsToUpdate: {
     type: Array,
