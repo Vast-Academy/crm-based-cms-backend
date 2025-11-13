@@ -15,8 +15,9 @@ const allowedOrigins = [
     'https://www.codeonwork.in',
     'https://codeonwork.in',
     process.env.FORNTEND_URL, // आपके .env से
-    'http://localhost:3000' // लोकल डेवलपमेंट के लिए
-  ];
+    'http://localhost:3000', 
+     'capacitor://localhost'
+  ].filter(Boolean);
   app.use(cors({
     origin: allowedOrigins,
     credentials: true,
