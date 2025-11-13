@@ -14,7 +14,6 @@ const allowedOrigins = [
     'https://crm-based-cms-frontend.vercel.app', 
     'https://www.codeonwork.in',
     'https://codeonwork.in',
-    'capacitor://localhost',
     process.env.FORNTEND_URL, // आपके .env से
     'http://localhost:3000' // लोकल डेवलपमेंट के लिए
   ];
