@@ -61,6 +61,11 @@ const dealerSchema = new mongoose.Schema({
 // Create index for search optimization
 dealerSchema.index({ name: 'text', phoneNumber: 'text', firmName: 'text' });
 
+// Performance optimization indexes
+dealerSchema.index({ branch: 1, createdAt: -1 }); // For filtering by branch and sorting
+dealerSchema.index({ createdBy: 1 }); // For populate optimization
+dealerSchema.index({ 'remarks.createdBy': 1 }); // For nested populate optimization
+
 const dealerModel = mongoose.model('Dealer', dealerSchema);
 
 module.exports = dealerModel;

@@ -115,6 +115,10 @@ const leadSchema = new mongoose.Schema({
 // Create index for search optimization
 leadSchema.index({ name: 'text', phoneNumber: 'text', email: 'text' });
 
+// Performance optimization indexes
+leadSchema.index({ branch: 1, isConverted: 1, createdAt: -1 }); // For filtering leads by branch and conversion status
+leadSchema.index({ createdBy: 1 }); // For populate optimization
+
 const leadModel = mongoose.model('Lead', leadSchema);
 
 module.exports = leadModel;

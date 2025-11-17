@@ -61,6 +61,11 @@ const distributorSchema = new mongoose.Schema({
 // Create index for search optimization
 distributorSchema.index({ name: 'text', phoneNumber: 'text', firmName: 'text' });
 
+// Performance optimization indexes
+distributorSchema.index({ branch: 1, createdAt: -1 }); // For filtering by branch and sorting
+distributorSchema.index({ createdBy: 1 }); // For populate optimization
+distributorSchema.index({ 'remarks.createdBy': 1 }); // For nested populate optimization
+
 const distributorModel = mongoose.model('Distributor', distributorSchema);
 
 module.exports = distributorModel;

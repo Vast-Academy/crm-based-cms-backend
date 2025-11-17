@@ -131,5 +131,11 @@ const billSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// Performance optimization indexes
+billSchema.index({ customer: 1, status: 1 }); // For customer bills with status filter
+billSchema.index({ orderId: 1 }); // For quick order lookup
+billSchema.index({ technician: 1 }); // For technician bills
+billSchema.index({ status: 1, createdAt: -1 }); // For filtering by status and sorting
+
 const BillModel = mongoose.model('Bill', billSchema);
 module.exports = BillModel;

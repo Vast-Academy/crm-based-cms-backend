@@ -268,14 +268,20 @@ customerSchema.index({ name: 'text', phoneNumber: 'text', email: 'text' });
 // Create unique index for workOrders.orderId with partial filter
 // Only creates index for documents that have workOrders with orderId that is a string
 customerSchema.index(
-  { 'workOrders.orderId': 1 }, 
-  { 
-    unique: true, 
-    partialFilterExpression: { 
+  { 'workOrders.orderId': 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
       'workOrders.orderId': { $type: 'string' }
-    } 
+    }
   }
 );
+
+// Performance optimization indexes
+customerSchema.index({ branch: 1, createdAt: -1 }); // For filtering by branch and sorting
+customerSchema.index({ createdBy: 1 }); // For populate optimization
+customerSchema.index({ 'workOrders.technician': 1 }); // For technician work orders query
+customerSchema.index({ 'workOrders.status': 1 }); // For status filtering
 
 const customerModel = mongoose.model('Customer', customerSchema);
 

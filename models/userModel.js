@@ -70,6 +70,12 @@ const UserSchema = new mongoose.Schema({
     default: Date.now
   },
 });
+
+// Performance optimization indexes
+UserSchema.index({ role: 1, branch: 1 }); // For filtering users by role and branch
+UserSchema.index({ role: 1, status: 1 }); // For filtering by role and status
+UserSchema.index({ branch: 1 }); // For branch-based queries
+
 // Hash password before saving
 UserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
