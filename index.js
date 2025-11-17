@@ -38,6 +38,17 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
+// Disable ETag for API routes to prevent 304 caching
+app.set('etag', false);
+
+// Add cache control headers to prevent browser caching
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 app.use('/api/ota', pushRoutes);
 
 app.use("/api", router);
