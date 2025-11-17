@@ -3,6 +3,8 @@ const ReturnedInventory = require('../../models/returnedInventoryModel');
 const Item = require('../../models/inventoryModel');
 const TransferHistory = require('../../models/transferHistoryModel');
 const TechnicianInventory = require('../../models/technicianInventoryModel');
+const User = require('../../models/userModel');
+const sendNotification = require('../../helpers/push/sendNotification');
 
 const confirmReturnedInventory = async (req, res) => {
   try {
@@ -107,6 +109,40 @@ const confirmReturnedInventory = async (req, res) => {
       
       // Commit the transaction
       await session.commitTransaction();
+
+      try {
+        const technician = await User.findById(returnEntry.technician).select('fcmTokens');
+        const tokens = technician?.fcmTokens?.map((entry) => entry.token).filter(Boolean) || [];
+        if (tokens.length) {
+          const totalItemsReturned = returnEntry.items.reduce((sum, item) => {
+            if (item.type === 'serialized-product') {
+              return sum + 1;
+            }
+            return sum + (item.quantity || 0);
+          }, 0);
+          const itemLabel = totalItemsReturned === 1 ? 'item' : 'items';
+          const notificationTitle = 'Inventory Return Approved';
+          const notificationBody = `Your ${totalItemsReturned} ${itemLabel} have been returned successfully.`;
+
+          await sendNotification({
+            tokens,
+            notification: {
+              title: notificationTitle,
+              body: notificationBody,
+            },
+            data: {
+              title: notificationTitle,
+              body: notificationBody,
+              totalItems: totalItemsReturned.toString(),
+              status: 'confirmed',
+              url: '/technician-dashboard?tab=inventory',
+              icon: '/logo192.png',
+            },
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to notify technician about return approval:', notificationError);
+      }
       
       res.json({
         success: true,

@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const ReturnedInventory = require('../../models/returnedInventoryModel');
 const TechnicianInventory = require('../../models/technicianInventoryModel');
 const Item = require('../../models/inventoryModel');
+const User = require('../../models/userModel');
+const sendNotification = require('../../helpers/push/sendNotification');
 
 const rejectReturnedInventory = async (req, res) => {
   try {
@@ -112,6 +114,35 @@ const rejectReturnedInventory = async (req, res) => {
 
       // Commit the transaction
       await session.commitTransaction();
+
+      try {
+        const technician = await User.findById(returnEntry.technician).select('fcmTokens');
+        const tokens = technician?.fcmTokens?.map((entry) => entry.token).filter(Boolean) || [];
+        if (tokens.length) {
+          const cleanReason = (rejectionReason || '').replace(/\s+/g, ' ').trim();
+          const truncatedReason = cleanReason.length > 120 ? `${cleanReason.slice(0, 117)}...` : cleanReason;
+          const notificationTitle = 'Inventory Return Rejected';
+          const notificationBody = truncatedReason || 'Your inventory return request was rejected.';
+
+          await sendNotification({
+            tokens,
+            notification: {
+              title: notificationTitle,
+              body: notificationBody,
+            },
+            data: {
+              title: notificationTitle,
+              body: notificationBody,
+              status: 'rejected',
+              reason: truncatedReason,
+              url: '/technician-dashboard?tab=inventory',
+              icon: '/logo192.png',
+            },
+          });
+        }
+      } catch (notificationError) {
+        console.error('Failed to notify technician about return rejection:', notificationError);
+      }
 
       res.json({
         success: true,
