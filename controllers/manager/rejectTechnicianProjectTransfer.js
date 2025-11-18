@@ -35,14 +35,14 @@ const rejectTechnicianProjectTransfer = async (req, res) => {
 
     // Add entry to status history for the work order
     workOrder.statusHistory.push({
-      status: 'rejected',
+      status: 'transfer-rejected',
       remark: rejectReason,
       updatedBy: userId,
       updatedAt: new Date()
     });
 
-    // Update the work order status to rejected
-    workOrder.status = 'rejected';
+    // Update the work order status back to in-progress (reject means technician continues work)
+    workOrder.status = 'in-progress';
     workOrder.updatedAt = new Date();
 
     await customer.save();
@@ -60,7 +60,7 @@ const rejectTechnicianProjectTransfer = async (req, res) => {
           const cleanReason = (rejectReason || '').replace(/\s+/g, ' ').trim();
           const truncatedReason = cleanReason.length > 120 ? `${cleanReason.slice(0, 117)}...` : cleanReason;
           const notificationTitle = 'Project Transfer Request Rejected';
-          const notificationBody = `${customerDisplayName} • Status: Rejected${truncatedReason ? ` • Reason: ${truncatedReason}` : ''}`;
+          const notificationBody = `${customerDisplayName} • Status: Transfer Rejected - Continue Work${truncatedReason ? ` • Reason: ${truncatedReason}` : ''}`;
 
           await sendNotification({
             tokens,
