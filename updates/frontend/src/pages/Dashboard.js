@@ -555,14 +555,14 @@ const Dashboard = () => {
 
   // Define the dashboard stat boxes based on the role
   const dashboardStats = user.role === 'admin' ? [
-    { name: 'Total Branches', value: stats.branches, icon: FiHome, bgColor: 'bg-indigo-500', path: '/branches' },
-    { name: 'Total Staff', value: stats.staff, icon: FiUsers, bgColor: 'bg-blue-500', path: '/users/managers' },
-    { name: 'Inventory Items', value: stats.inventory, icon: FiPackage, bgColor: 'bg-yellow-500', path: '/inventory' },
-    { name: 'Customers', value: stats.customers, icon: FiUsers, bgColor: 'bg-green-500', path: '/contacts' },
-    { name: 'Work Orders', value: stats.workOrders, icon: FiTool, bgColor: 'bg-red-500', path: '/work-orders' },
-    { name: 'Assigned Projects', value: stats.assignedProjects, icon: FiActivity, bgColor: 'bg-purple-500', path: '/manager-dashboard' },
-    { name: 'Pending Approvals', value: stats.pendingApprovals, icon: FiClock, bgColor: 'bg-amber-500', path: '/manager-dashboard' },
-    { name: 'Completed Projects', value: stats.completedProjects, icon: FiCheckCircle, bgColor: 'bg-emerald-500', path: '/manager-dashboard' }
+    { name: 'Total Branches', value: stats.branches, icon: FiHome, bgColor: 'bg-pink-500', path: '/branches' },
+    { name: 'Total Staff', value: stats.staff, icon: FiUsers, bgColor: 'bg-orange-500', path: '/users/managers' },
+    { name: 'Inventory Items', value: stats.inventory, icon: FiPackage, bgColor: 'bg-teal-500', path: '/inventory' },
+    { name: 'Customers', value: stats.customers, icon: FiUsers, bgColor: 'bg-gray-500', path: '/contacts' },
+    { name: 'Work Orders', value: stats.workOrders, icon: FiTool, bgColor: 'bg-blue-500', path: '/work-orders' },
+    { name: 'Assigned Projects', value: stats.assignedProjects, icon: FiActivity, bgColor: 'bg-brown-500', path: '/manager-dashboard' },
+    { name: 'Pending Approvals', value: stats.pendingApprovals, icon: FiClock, bgColor: 'bg-emerald-500', path: '/manager-dashboard' },
+    { name: 'Completed Projects', value: stats.completedProjects, icon: FiCheckCircle, bgColor: 'bg-red-500', path: '/manager-dashboard' }
   ] : [
     // Manager dashboard stats
     { name: 'Active Leads', value: stats.leads, icon: FiUsers, bgColor: 'bg-blue-500', path: '/contacts' },
