@@ -145,6 +145,10 @@ const processCustomerBulkPayment = require('../controllers/sales/processCustomer
 // Transaction History controllers
 const getTransactionHistory = require('../controllers/transactionHistory/getTransactionHistory');
 
+// Backup controllers
+const exportFullBackup = require('../controllers/backup/exportFullBackup');
+const importFullBackup = require('../controllers/backup/importFullBackup');
+
 
 // Login 
 router.post("/login", loginController);
@@ -274,6 +278,10 @@ router.get("/get-technician-inventory", authToken, getTechnicianInventory);
 // Inventory Export/Import routes
 router.get("/export-inventory", authToken, exportInventory);
 router.post("/import-inventory", authToken, excelUpload.single('inventory'), handleExcelUploadError, importInventory);
+
+// Software Backup/Restore routes (Admin only)
+router.get("/export-full-backup", authToken, exportFullBackup);
+router.post("/import-full-backup", authToken, excelUpload.single('backup'), handleExcelUploadError, importFullBackup);
 
 // Dealer routes
 router.post("/create-dealer", authToken, createDealer);
